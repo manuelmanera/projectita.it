@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>L'Angolo Allegro di Don Giuseppe</title>
+    <style>
+        :root {
+            --primary-color: #10b981;
+            --primary-dark: #059669;
+            --bg-color: #f4f6f9;
+            --card-bg: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #4b5563;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            line-height: 1.6;
+            color: var(--text-main);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+        }
+
+        h1 {
+            color: #111827;
+            text-align: center;
+            font-size: 2.8em;
+            margin-bottom: 8px;
+            font-weight: 800;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            font-style: italic;
+            font-size: 1.2em;
+            margin-bottom: 50px;
+        }
+
+        h2 {
+            color: #111827;
+            font-size: 1.8em;
+            border-bottom: 2px solid #edf2f7;
+            padding-bottom: 12px;
+            margin-top: 50px;
+            font-weight: 700;
+        }
+
+        /* CARD DELLE FOTO (3:4 Verticale) */
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
+            margin-bottom: 50px;
+        }
+
+        .gallery-item {
+            overflow: hidden;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            background: #e5e7eb;
+            aspect-ratio: 3 / 4;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .gallery-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        /* PLAYLIST AUDIO */
+        .playlist-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .song-box {
+            display: flex;
+            flex-direction: column;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 24px;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .song-box:hover {
+            border-color: var(--primary-color);
+            background: #ffffff;
+            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.05);
+        }
+
+        .song-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        /* Copertina Quadrata 1:1 */
+        .song-cover {
+            width: 70px;
+            height: 70px;
+            border-radius: 12px;
+            object-fit: cover;
+            background: #cbd5e1;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+
+        .song-info {
+            flex: 1;
+        }
+
+        .song-title {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #111827;
+            margin: 0 0 4px 0;
+        }
+
+        .song-description {
+            font-size: 0.95em;
+            color: var(--text-muted);
+            margin: 0;
+            font-style: italic;
+        }
+
+        .song-player {
+            margin-top: auto;
+        }
+
+        audio {
+            width: 100%;
+            height: 40px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- INTESTAZIONE -->
+    <h1>I Sorrisi e le Hit di Don Giuseppe! 📸🎵</h1>
+    <p class="subtitle">Uno spazio speciale dedicato al nostro super parroco, tra scatti rubati, momenti di gioia e canzoni dedicate (con affetto!)</p>
+
+    <!-- SEZIONE FOTO (19 TOTALI) -->
+    <h2>📸 Don Giuseppe dietro le quinte</h2>
+    <p style="color: var(--text-muted); margin-bottom: 24px;">Ecco i momenti più divertenti e spontanei passati insieme in parrocchia, al Grest e nei campi estivi.</p>
+    
+    <div class="gallery">
+        <div class="gallery-item"><img src="foto%20don/foto1.jpg" alt="Don Giuseppe 1"></div>
+        <div class="gallery-item"><img src="foto%20don/foto2.jpg" alt="Don Giuseppe 2"></div>
+        <div class="gallery-item"><img src="foto%20don/foto3.jpg" alt="Don Giuseppe 3"></div>
+        <div class="gallery-item"><img src="foto%20don/foto4.jpg" alt="Don Giuseppe 4"></div>
+        <div class="gallery-item"><img src="foto%20don/foto5.jpg" alt="Don Giuseppe 5"></div>
+        <div class="gallery-item"><img src="foto%20don/foto6.jpg" alt="Don Giuseppe 6"></div>
+        <div class="gallery-item"><img src="foto%20don/foto7.jpg" alt="Don Giuseppe 7"></div>
+        <div class="gallery-item"><img src="foto%20don/foto8.jpg" alt="Don Giuseppe 8"></div>
+        <div class="gallery-item"><img src="foto%20don/foto9.jpg" alt="Don Giuseppe 9"></div>
+        <div class="gallery-item"><img src="foto%20don/foto10.jpg" alt="Don Giuseppe 10"></div>
+        <div class="gallery-item"><img src="foto%20don/foto11.jpg" alt="Don Giuseppe 11"></div>
+        <div class="gallery-item"><img src="foto%20don/foto12.jpg" alt="Don Giuseppe 12"></div>
+        <div class="gallery-item"><img src="foto%20don/foto13.jpg" alt="Don Giuseppe 13"></div>
+        <div class="gallery-item"><img src="foto%20don/foto14.jpg" alt="Don Giuseppe 14"></div>
+        <div class="gallery-item"><img src="foto%20don/foto15.jpg" alt="Don Giuseppe 15"></div>
+        <div class="gallery-item"><img src="foto%20don/foto16.jpg" alt="Don Giuseppe 16"></div>
+        <div class="gallery-item"><img src="foto%20don/foto17.jpg" alt="Don Giuseppe 17"></div>
+        <div class="gallery-item"><img src="foto%20don/foto18.jpg" alt="Don Giuseppe 18"></div>
+        <div class="gallery-item"><img src="foto%20don/foto19.jpg" alt="Don Giuseppe 19"></div>
+    </div>
+
+    <!-- SEZIONE PLAYLIST -->
+    <h2>🎤 Le Canzoni per Don Giuseppe</h2>
+    <p style="color: var(--text-muted); margin-bottom: 24px;">Ascolta i brani dedicati e scopri le storie dietro ogni traccia.</p>
+
+    <div class="playlist-container">
+        <!-- Canzone 1 -->
+        <div class="song-box">
+            <div class="song-header">
+                <img class="song-cover" data-cover alt="Copertina 1">
+                <div class="song-info">
+                    <p class="song-title">1. Preghiera per Peppino</p>
+                    <p class="song-description">Brano dedicato ai momenti di riflessione e comunità.</p>
+                </div>
+            </div>
+            <div class="song-player">
+                <audio controls>
+                    <source src="foto%20don/canzoni%20don/canzone1.mp3" type="audio/mpeg">
+                </audio>
+            </div>
+        </div>
+
+        <!-- Canzone 2 -->
+        <div class="song-box">
+            <div class="song-header">
+                <img class="song-cover" data-cover alt="Copertina 2">
+                <div class="song-info">
+                    <p class="song-title">2. Secondo Brano Dedicato</p>
+                    <p class="song-description">GREST-2K26 PEPPINO</p>
+                </div>
+            </div>
+            <div class="song-player">
+                <audio controls>
+                    <source src="foto%20don/canzoni%20don/canzone2.mp3" type="audio/mpeg">
+                </audio>
+            </div>
+        </div>
+
+        <!-- Canzone 3 -->
+        <div class="song-box">
+            <div class="song-header">
+                <img class="song-cover" data-cover alt="Copertina 3">
+                <div class="song-info">
+                    <p class="song-title">3. Peppino Pasticcione</p>
+                    <p class="song-description">Dedicata ai foglietti persi nei cassetti</p>
+                </div>
+            </div>
+            <div class="song-player">
+                <audio controls>
+                    <source src="foto%20don/canzoni%20don/canzone3.mp3" type="audio/mpeg">
+                </audio>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- SCRIPT SYSTEM PER COPERTINE CASUALI IN ALTRO MODO SICURO -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var covers = document.querySelectorAll('[data-cover]');
+        var totalPhotos = 19;
+        
+        // Creiamo un array da 1 a 19 e mescoliamolo
+        var photoNumbers = [];
+        for (var i = 1; i <= totalPhotos; i++) {
+            photoNumbers.push(i);
+        }
+        photoNumbers.sort(function() { return 0.5 - Math.random(); });
+        
+        // Assegniamo i percorsi decodificati corretti usando la codifica standard dei caratteri
+        covers.forEach(function(imgElement, index) {
+            var randomPhotoNum = photoNumbers[index];
+            imgElement.src = "foto don/foto" + randomPhotoNum + ".jpg";
+        });
+    });
+</script>
+
+</body>
+</html>
