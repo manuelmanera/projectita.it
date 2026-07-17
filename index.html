@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Cantiere TEST - Pubblico</title>
+    <style>
+        body { background-color: #f7d51d; font-family: sans-serif; display: flex; justify-content: center; padding: 20px; }
+        .box { background: #fff; padding: 30px; border: 8px solid #000; width: 100%; max-width: 500px; text-align: center; }
+        #display { font-size: 1.5rem; font-weight: bold; margin: 20px 0; padding: 20px; border: 2px dashed #000; }
+        .nav { margin-top: 20px; font-size: 2rem; cursor: pointer; }
+        .hidden { display: none; }
+        #history-list { text-align: left; margin-top: 15px; }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <h1>⚠️ CANTIERE</h1>
+    <div id="display">Caricamento in corso...</div>
+    
+    <div class="nav">
+        <span onclick="toggleHistory()" title="Vedi Storico">🕑</span>
+    </div>
+
+    <div id="history-box" class="hidden">
+        <h3>STORICO TEST</h3>
+        <div id="history-list"></div>
+    </div>
+</div>
+
+<script>
+    // Carica il file JSON dal tuo repository
+    async function caricaDati() {
+        try {
+            const risposta = await fetch('test.json');
+            const dati = await risposta.json();
+            
+            document.getElementById('display').innerText = dati.testAttivo;
+            
+            const lista = document.getElementById('history-list');
+            lista.innerHTML = dati.storico.map(t => `<p>• ${t}</p>`).join('');
+        } catch (error) {
+            document.getElementById('display').innerText = "Errore nel caricamento dei dati.";
+        }
+    }
+
+    function toggleHistory() {
+        document.getElementById('history-box').classList.toggle('hidden');
+    }
+
+    // Esegui al caricamento
+    caricaDati();
+</script>
+</body>
+</html>
+
