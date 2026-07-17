@@ -16,65 +16,75 @@
 
         body {
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            line-height: 1.6;
+            line-height: 1.5;
             color: var(--text-main);
             background-color: var(--bg-color);
             margin: 0;
-            padding: 40px 20px;
+            padding: 20px 10px;
         }
 
         .container {
             max-width: 1100px;
             margin: 0 auto;
             background: var(--card-bg);
-            padding: 40px;
-            border-radius: 24px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+            padding: 20px;
+            border-radius: 18px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
         }
 
+        /* Ottimizzazione Intestazione */
         h1 {
             color: #111827;
             text-align: center;
-            font-size: 2.8em;
+            font-size: 1.8em;
+            margin-top: 10px;
             margin-bottom: 8px;
             font-weight: 800;
+            line-height: 1.2;
         }
 
         .subtitle {
             text-align: center;
             color: var(--text-muted);
             font-style: italic;
-            font-size: 1.2em;
-            margin-bottom: 50px;
+            font-size: 1em;
+            margin-bottom: 30px;
+            padding: 0 10px;
         }
 
         h2 {
             color: #111827;
-            font-size: 1.8em;
+            font-size: 1.4em;
             border-bottom: 2px solid #edf2f7;
-            padding-bottom: 12px;
-            margin-top: 50px;
+            padding-bottom: 8px;
+            margin-top: 35px;
             font-weight: 700;
         }
 
-        /* CARD DELLE FOTO (3:4 Verticale) */
+        .section-desc {
+            color: var(--text-muted);
+            font-size: 0.95em;
+            margin-bottom: 20px;
+        }
+
+        /* GRIGLIA FOTO: Responsive e ottimizzata per verticali 3:4 */
         .gallery {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 24px;
-            margin-bottom: 50px;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-bottom: 40px;
         }
 
         .gallery-item {
             overflow: hidden;
-            border-radius: 16px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
             background: #e5e7eb;
             aspect-ratio: 3 / 4;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+            transition: transform 0.2s ease;
         }
 
         .gallery-item img {
@@ -83,16 +93,11 @@
             object-fit: cover;
         }
 
-        .gallery-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
-        }
-
-        /* PLAYLIST AUDIO */
+        /* LAYOUT PLAYLIST AUDIO */
         .playlist-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 24px;
+            grid-template-columns: 1fr;
+            gap: 16px;
         }
 
         .song-box {
@@ -100,60 +105,80 @@
             flex-direction: column;
             background: #f8fafc;
             border: 1px solid #e2e8f0;
-            padding: 24px;
-            border-radius: 20px;
-            transition: all 0.3s ease;
-        }
-
-        .song-box:hover {
-            border-color: var(--primary-color);
-            background: #ffffff;
-            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.05);
+            padding: 16px;
+            border-radius: 16px;
         }
 
         .song-header {
             display: flex;
             align-items: center;
-            gap: 16px;
-            margin-bottom: 16px;
+            gap: 12px;
+            margin-bottom: 12px;
         }
 
         /* Copertina Quadrata 1:1 */
         .song-cover {
-            width: 70px;
-            height: 70px;
-            border-radius: 12px;
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
             object-fit: cover;
             background: #cbd5e1;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            flex-shrink: 0;
         }
 
         .song-info {
             flex: 1;
+            min-width: 0;
         }
 
         .song-title {
-            font-size: 1.2em;
+            font-size: 1.05em;
             font-weight: 700;
             color: #111827;
-            margin: 0 0 4px 0;
+            margin: 0 0 2px 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .song-description {
-            font-size: 0.95em;
+            font-size: 0.88em;
             color: var(--text-muted);
             margin: 0;
             font-style: italic;
         }
 
         .song-player {
-            margin-top: auto;
+            margin-top: 8px;
         }
 
         audio {
             width: 100%;
             height: 40px;
-            border-radius: 8px;
+        }
+
+        /* DA COMPUTER (Schermi sopra i 768px) */
+        @media (min-width: 768px) {
+            body {
+                padding: 40px 20px;
+            }
+            .container {
+                padding: 40px;
+                border-radius: 24px;
+            }
+            h1 { font-size: 2.6em; }
+            .subtitle { font-size: 1.2em; }
+            h2 { font-size: 1.7em; }
+            .gallery {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 24px;
+            }
+            .playlist-container {
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 24px;
+            }
+            .song-box { padding: 24px; }
+            .song-cover { width: 70px; height: 70px; }
         }
     </style>
 </head>
@@ -165,9 +190,9 @@
     <h1>I Sorrisi e le Hit di Don Giuseppe! 📸🎵</h1>
     <p class="subtitle">Uno spazio speciale dedicato al nostro super parroco, tra scatti rubati, momenti di gioia e canzoni dedicate (con affetto!)</p>
 
-    <!-- SEZIONE FOTO (19 TOTALI) -->
+    <!-- SEZIONE FOTO -->
     <h2>📸 Don Giuseppe dietro le quinte</h2>
-    <p style="color: var(--text-muted); margin-bottom: 24px;">Ecco i momenti più divertenti e spontanei passati insieme in parrocchia, al Grest e nei campi estivi.</p>
+    <p class="section-desc">Ecco i momenti più divertenti e spontanei passati insieme in parrocchia, al Grest e nei campi estivi.</p>
     
     <div class="gallery">
         <div class="gallery-item"><img src="foto%20don/foto1.jpg" alt="Don Giuseppe 1"></div>
@@ -193,7 +218,7 @@
 
     <!-- SEZIONE PLAYLIST -->
     <h2>🎤 Le Canzoni per Don Giuseppe</h2>
-    <p style="color: var(--text-muted); margin-bottom: 24px;">Ascolta i brani dedicati e scopri le storie dietro ogni traccia.</p>
+    <p class="section-desc">Ascolta i brani dedicati e scopri le storie dietro ogni traccia.</p>
 
     <div class="playlist-container">
         <!-- Canzone 1 -->
@@ -206,7 +231,8 @@
                 </div>
             </div>
             <div class="song-player">
-                <audio controls>
+                <!-- Protezione anti-download applicata -->
+                <audio controls controlsList="nodownload" oncontextmenu="return false;">
                     <source src="foto%20don/canzoni%20don/canzone1.mp3" type="audio/mpeg">
                 </audio>
             </div>
@@ -217,12 +243,13 @@
             <div class="song-header">
                 <img class="song-cover" data-cover alt="Copertina 2">
                 <div class="song-info">
-                    <p class="song-title">2. Secondo Brano Dedicato</p>
-                    <p class="song-description">GREST-2K26 PEPPINO</p>
+                    <p class="song-title">2. GREST-2K26 PEPPINO</p>
+                    <p class="song-description">Inno estivo ufficiale della parrocchia.</p>
                 </div>
             </div>
             <div class="song-player">
-                <audio controls>
+                <!-- Protezione anti-download applicata -->
+                <audio controls controlsList="nodownload" oncontextmenu="return false;">
                     <source src="foto%20don/canzoni%20don/canzone2.mp3" type="audio/mpeg">
                 </audio>
             </div>
@@ -238,7 +265,8 @@
                 </div>
             </div>
             <div class="song-player">
-                <audio controls>
+                <!-- Protezione anti-download applicata -->
+                <audio controls controlsList="nodownload" oncontextmenu="return false;">
                     <source src="foto%20don/canzoni%20don/canzone3.mp3" type="audio/mpeg">
                 </audio>
             </div>
@@ -247,23 +275,21 @@
 
 </div>
 
-<!-- SCRIPT SYSTEM PER COPERTINE CASUALI IN ALTRO MODO SICURO -->
+<!-- SCRIPT SYSTEM PER COPERTINE CASUALI -->
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         var covers = document.querySelectorAll('[data-cover]');
         var totalPhotos = 19;
         
-        // Creiamo un array da 1 a 19 e mescoliamolo
         var photoNumbers = [];
         for (var i = 1; i <= totalPhotos; i++) {
             photoNumbers.push(i);
         }
         photoNumbers.sort(function() { return 0.5 - Math.random(); });
         
-        // Assegniamo i percorsi decodificati corretti usando la codifica standard dei caratteri
         covers.forEach(function(imgElement, index) {
             var randomPhotoNum = photoNumbers[index];
-            imgElement.src = "foto don/foto" + randomPhotoNum + ".jpg";
+            imgElement.src = "foto%20don/foto" + randomPhotoNum + ".jpg";
         });
     });
 </script>
