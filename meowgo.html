@@ -18,13 +18,21 @@
       color: #3d312a;
     }
 
+    /* BOX DEDICATO ESCLUSIVAMENTE AL MEOWGARDEN */
+    #garden-container-box {
+      width: 100%;
+      height: 450px;
+      position: relative;
+      background: rgba(255, 255, 255, 0.4);
+      border: 2px dashed #b45309;
+      border-radius: 1.5rem;
+      overflow: hidden;
+    }
+
     #garden-canvas {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      z-index: 0;
-      pointer-events: none;
-      display: none; /* Visibile solo nella sezione MeowGarden */
+      width: 100%;
+      height: 100%;
+      display: block;
     }
 
     .glass-card {
@@ -65,7 +73,6 @@
 
     .auth-toggle-btn { cursor: pointer; color: #b45309; font-weight: bold; text-decoration: underline; }
 
-    /* STILI BADGE NORMAL E SEGRETI */
     .badge-card {
       background: rgba(245, 238, 230, 0.8);
       border-radius: 1rem;
@@ -128,8 +135,6 @@
 </head>
 <body class="pb-5">
 
-  <canvas id="garden-canvas"></canvas>
-
   <nav class="navbar navbar-expand-lg navbar-light sticky-top navbar-glass mb-4 position-relative z-3">
     <div class="container">
       <a class="navbar-brand fw-black fs-3 text-dark d-flex align-items-center gap-2" href="#" onclick="showPage('feed-page')">
@@ -187,7 +192,7 @@
       </div>
     </section>
 
-    <!-- 2. FEED -->
+    <!-- 2. FEED (SFONDO NORMALE E PULITO) -->
     <section id="feed-page" class="page-section">
       <div class="row justify-content-center">
         <div class="col-lg-7">
@@ -202,11 +207,19 @@
       </div>
     </section>
 
-    <!-- 3. MEOWGARDEN (Canvas attivo solo qui) -->
+    <!-- 3. MEOWGARDEN (MOSTRA SOLO I GATTI DELL'UTENTE CONNESSO) -->
     <section id="garden-page" class="page-section">
-      <div class="glass-card p-4 text-center mb-4">
-        <h2 class="fw-bold text-success mb-2"><i class="fa-solid fa-tree"></i> Il Tuo MeowGarden</h2>
-        <p class="text-muted mb-0">I tuoi gatti personai vagano felicemente in questo giardino!</p>
+      <div class="row justify-content-center">
+        <div class="col-lg-8 text-center">
+          <div class="glass-card p-4 mb-4">
+            <h2 class="fw-bold text-success mb-1"><i class="fa-solid fa-tree"></i> Il Giardino di <span id="garden-owner-name">...</span></h2>
+            <p class="text-muted mb-0">Qui dentro vagano unicamente i gatti che hai catturato personalmente!</p>
+          </div>
+
+          <div id="garden-container-box">
+            <canvas id="garden-canvas"></canvas>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -361,7 +374,7 @@
       }
     };
 
-    // AUTH DB
+    // LOGIN & REGISTRAZIONE
     document.getElementById('auth-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       
@@ -385,7 +398,7 @@
           }
 
           const newUserRef = push(ref(db, 'users'));
-          const newUser = { username, email, password, xp: 0, catsFound: 0, badges: {} };
+          const newUser = { username, email, password, xp: 0, catsFound: 0, badges: {}, userCats: [] };
 
           await update(newUserRef, newUser);
           currentUser = { id: newUserRef.key, ...newUser };
@@ -417,9 +430,12 @@
     function loginSuccess() {
       document.getElementById('user-display-name').innerText = currentUser.username;
       document.getElementById('user-email-badge').innerText = currentUser.email;
+      document.getElementById('garden-owner-name').innerText = currentUser.username;
+      
       updateNavbar(true);
       listenToFeed();
       updateUI();
+      reloadPersonalGarden();
       showPage('feed-page');
     }
 
@@ -430,16 +446,13 @@
       showPage('login-page');
     };
 
-    // MOSTRA/NASCONDE PAGINE E CONTROLLA LA VISIBILITÀ DEL GIARDINO
     window.showPage = function(pageId) {
       document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
       document.getElementById(pageId).classList.add('active');
       
-      const gardenCanvas = document.getElementById('garden-canvas');
       if (pageId === 'garden-page') {
-        gardenCanvas.style.display = 'block';
-      } else {
-        gardenCanvas.style.display = 'none';
+        resizeCanvas();
+        reloadPersonalGarden();
       }
 
       window.scrollTo(0,0);
@@ -461,12 +474,12 @@
       }
     }
 
+    // FEED
     function listenToFeed() {
       const catsRef = ref(db, 'cats');
       onValue(catsRef, (snapshot) => {
         const container = document.getElementById('feed-container');
         container.innerHTML = '';
-        activeGardenCats.length = 0; // Svuota il giardino prima del ricaricamento
 
         if (snapshot.exists()) {
           const data = snapshot.val();
@@ -476,11 +489,6 @@
             const likesMap = post.likes || {};
             const likesCount = Object.keys(likesMap).length;
             const isLiked = currentUser && likesMap[currentUser.id];
-
-            // SOLO I GATTI DELL'UTENTE CORRENTE FINISCONO NEL SUO MEOWGARDEN
-            if (currentUser && post.author === currentUser.username) {
-              spawnGardenCat(post.imageUrl);
-            }
 
             const card = document.createElement('div');
             card.className = "glass-card overflow-hidden";
@@ -517,7 +525,7 @@
       }
     };
 
-    // UPLOAD CON VERIFICA DEI BADGE SEGRETI
+    // CARICAMENTO GATTO
     document.getElementById('upload-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const nameInput = document.getElementById('cat-name-input');
@@ -545,6 +553,7 @@
 
         const imageUrl = result.data.url;
 
+        // Salva post pubblico per il Feed
         const newCatRef = push(ref(db, 'cats'));
         await update(newCatRef, {
           author: currentUser.username,
@@ -555,8 +564,12 @@
         });
 
         if (!currentUser.badges) currentUser.badges = {};
-        let unlockedSecret = false;
+        if (!currentUser.userCats) currentUser.userCats = [];
 
+        // Aggiungi la foto alla lista PERSONALE dell'utente per il suo giardino
+        currentUser.userCats.push(imageUrl);
+
+        let unlockedSecret = false;
         const rules = [
           { key: 'pelata', words: ['pelata', 'pelato', 'sfinge', 'sphynx', 'calvo', 'gatito'] },
           { key: 'maranza', words: ['maranza', 'tuta', 'tn'] },
@@ -595,13 +608,15 @@
         await update(ref(db, `users/${currentUser.id}`), {
           xp: currentUser.xp,
           catsFound: currentUser.catsFound,
-          badges: currentUser.badges
+          badges: currentUser.badges,
+          userCats: currentUser.userCats
         });
 
         confetti({ particleCount: unlockedSecret ? 120 : 50, spread: 70, origin: { y: 0.6 } });
         if(unlockedSecret) alert("🕵️‍♂️ FANTASTICO! Hai sbloccato un BADGE SEGRETO!");
 
         updateUI();
+        reloadPersonalGarden();
 
         nameInput.value = '';
         photoInput.value = '';
@@ -626,13 +641,11 @@
       document.getElementById('user-xp').innerText = xp % 1000;
       document.getElementById('xp-bar').style.width = `${(xp % 1000) / 10}%`;
 
-      // Badge Normali
       document.getElementById('badge-first').classList.toggle('unlocked', catsFound >= 1);
       document.getElementById('badge-hunter').classList.toggle('unlocked', catsFound >= 5);
       document.getElementById('badge-master').classList.toggle('unlocked', catsFound >= 10);
       document.getElementById('badge-lvl2').classList.toggle('unlocked', level >= 2);
 
-      // Visibilità Badge Segreti
       const badgeKeys = ['pelata', 'maranza', 'police', 'marescialla', 'pizza', 'space', 'ninja', 'wizard', 'royal', 'pirate', 'rocker', 'chef', 'hero', 'hacker', 'detective', 'vampire', 'ghost', 'zombie', 'soccer', 'artist', 'gamer'];
       let countUnlockedSecrets = 0;
 
@@ -653,46 +666,75 @@
       }
     }
 
-    // CANVAS GIARDINO
+    // MEOWGARDEN INTERNO AL BOX
     const canvas = document.getElementById('garden-canvas');
     const ctx = canvas.getContext('2d');
-    function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+    
+    function resizeCanvas() {
+      const box = document.getElementById('garden-container-box');
+      if(box) {
+        canvas.width = box.clientWidth;
+        canvas.height = box.clientHeight;
+      }
+    }
     window.addEventListener('resize', resizeCanvas);
-    resizeCanvas();
 
     const activeGardenCats = [];
+
     class GardenCat {
       constructor(imgSrc) {
-        this.x = Math.random() * (canvas.width - 100) + 50;
-        this.y = Math.random() * (canvas.height - 100) + 50;
-        this.speedX = (Math.random() - 0.5) * 1.5;
-        this.speedY = (Math.random() - 0.5) * 1.5;
-        this.radius = 30;
+        this.radius = 35;
+        this.x = Math.random() * (canvas.width - this.radius * 2) + this.radius;
+        this.y = Math.random() * (canvas.height - this.radius * 2) + this.radius;
+        this.speedX = (Math.random() - 0.5) * 2;
+        this.speedY = (Math.random() - 0.5) * 2;
         this.img = new Image();
         this.img.crossOrigin = "anonymous";
         this.img.src = imgSrc;
       }
+
       update() {
-        this.x += this.speedX; this.y += this.speedY;
+        this.x += this.speedX;
+        this.y += this.speedY;
+
         if (this.x - this.radius < 0 || this.x + this.radius > canvas.width) this.speedX *= -1;
         if (this.y - this.radius < 0 || this.y + this.radius > canvas.height) this.speedY *= -1;
       }
+
       draw() {
         ctx.save();
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
         ctx.clip();
-        if (this.img.complete) ctx.drawImage(this.img, this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
+        if (this.img.complete) {
+          ctx.drawImage(this.img, this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
+        }
         ctx.restore();
+
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.strokeStyle = '#b45309';
+        ctx.lineWidth = 3;
+        ctx.stroke();
       }
     }
-    function spawnGardenCat(src) { activeGardenCats.push(new GardenCat(src)); }
+
+    // RICARICA E MOSTRA ESCLUSIVAMENTE I GATTI DELL'UTENTE CORRENTE
+    function reloadPersonalGarden() {
+      activeGardenCats.length = 0;
+      if (!currentUser || !currentUser.userCats) return;
+
+      currentUser.userCats.forEach(imgUrl => {
+        activeGardenCats.push(new GardenCat(imgUrl));
+      });
+    }
+
     function animate() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      // Disegna e muove i gatti solo se il canvas è attualmente visibile
-      if (canvas.style.display === 'block') {
-        activeGardenCats.forEach(cat => { cat.update(); cat.draw(); });
-      }
+      activeGardenCats.forEach(cat => {
+        cat.update();
+        cat.draw();
+      });
       requestAnimationFrame(animate);
     }
 
@@ -702,6 +744,7 @@
       updateNavbar(false);
     }
 
+    resizeCanvas();
     animate();
   </script>
 </body>
