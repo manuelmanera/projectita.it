@@ -1,40 +1,59 @@
-// tracker.js - Invia la presenza dell'utente al server di tracciamento
+/**
+ * MeowGo Web Traffic Tracker
+ * Invia i dati di navigazione al server di analisi su PowerShell
+ */
 (function () {
+  // ⚠️ SOSTITUISCI QUESTO URL CON IL TUO LINK GENERATO DA NGROK
+  const NGROK_URL = 'https://xxxx-xx-xx-xx.ngrok-free.app';
+
   function trackUserPresence() {
-    // Prova a recuperare l'utente se salvato in localStorage o sessionStorage
-    // (Adatta 'user' se nella tua app usi una chiave diversa)
     let currentUser = { username: 'Anonimo', email: 'N/D' };
-    
+
+    // Tenta di recuperare i dati dell'utente dal localStorage o sessionStorage
     try {
-      const savedUser = localStorage.getItem('user') || sessionStorage.getItem('user');
+      const savedUser = localStorage.getItem('user') || 
+                        sessionStorage.getItem('user') || 
+                        localStorage.getItem('userData');
       if (savedUser) {
-        currentUser = JSON.parse(savedUser);
+        const parsed = JSON.parse(savedUser);
+        currentUser = {
+          username: parsed.username || parsed.catName || parsed.name || parsed.displayName || 'Anonimo',
+          email: parsed.email || parsed.userEmail || 'N/D'
+        };
       }
     } catch (e) {
-      // Se non è in formato JSON o c'è un errore, lascia default
+      // Se non è in formato JSON o c'è un errore, prosegue con i dati di default
     }
 
+    // Costruzione del pacchetto dati
     const payload = {
-      user: currentUser.username || currentUser.name || 'Anonimo',
-      email: currentUser.email || 'N/D',
-      page: window.location.pathname, // Es: /index.html, /feed.html, ecc.
-      userAgent: navigator.userAgent,
+      user: currentUser.username,
+      email: currentUser.email,
+      page: window.location.pathname || 'index.html', // Es. /feed.html
+      userAgent: navigator.userAgent,                // Info OS + Browser
       screenResolution: `${window.screen.width}x${window.screen.height}`
     };
 
-    // Invia il ping al tuo bot Node.js (porta 3000)
-    fetch('http://localhost:3000/api/track', {
+    // Invia i dati all'API di tracciamento
+    fetch(`${NGROK_URL}/api/track`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'true' // Evita la pagina di avviso di ngrok
+      },
       body: JSON.stringify(payload)
     }).catch(err => {
-      // Ignora silenziosamente se il bot di tracciamento è spento
+      // Ignora silenziosamente gli errori di connessione quando il bot è spento
     });
   }
 
-  // Esegui subito all'apertura della pagina
-  trackUserPresence();
+  // 1. Invia la segnalazione appena la pagina viene caricata
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    trackUserPresence();
+  } else {
+    document.addEventListener('DOMContentLoaded', trackUserPresence);
+  }
 
-  // Manda un ping ogni 30 secondi per segnalare che l'utente è ancora attivo
+  // 2. Invia un ping ogni 30 secondi per tracciare la presenza continua
   setInterval(trackUserPresence, 30000);
 })();
