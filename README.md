@@ -15,7 +15,7 @@ MeowGo è una piattaforma social e gamificata pensata per gli amanti dei gatti. 
 ### 👥 Autori & Sviluppatori
 
 > Sviluppato con passione da:
-> - 🟢 **Tu** *(Sviluppatore)*
+> - 🟢 **Manuel Manera**
 > - 🟢 **Tommaso Monti**
 
 ---
@@ -42,6 +42,6 @@ MeowGo è una piattaforma social e gamificata pensata per gli amanti dei gatti. 
 
 ### 🔒 Proprietà e Copyright
 
-**Copyright © 2026 Tu e Tommaso Monti. Tutti i diritti riservati.**
+**Copyright © 2026 MeowGO. Tutti i diritti riservati.**
 
 *Questo software e il relativo codice sorgente sono di proprietà esclusiva degli autori. È severamente vietata la copia, la modifica, la ridistribuzione o l'uso non autorizzato, totale o parziale, senza il previo consenso scritto dei proprietari del copyright.*
