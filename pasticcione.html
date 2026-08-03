@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎉 HAI VINTO! 🎉</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #12002b, #2c006b);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            width: 90%;
+            max-width: 550px;
+            box-sizing: border-box;
+            animation: popIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #ffd700;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+            animation: pulse 1.5s infinite;
+        }
+
+        .prize {
+            font-size: 3.5rem;
+            font-weight: bold;
+            color: #00ffcc;
+            margin: 20px 0;
+            text-shadow: 0 0 15px rgba(0, 255, 204, 0.6);
+        }
+
+        p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #ddd;
+        }
+
+        .btn {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 15px 40px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #12002b;
+            background: linear-gradient(45deg, #ffd700, #ff8800);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(255, 136, 0, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(255, 136, 0, 0.6);
+        }
+
+        /* Sezione video inizialmente nascosta */
+        #video-section {
+            display: none;
+        }
+
+        .video-wrapper {
+            position: relative;
+            width: 100%;
+            border-radius: 12px;
+            margin-top: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            background: black;
+            aspect-ratio: 16 / 9; 
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Schermata iniziale della finta vincita -->
+        <div id="promo-section">
+            <h1>CONGRATULAZIONI! 👑</h1>
+            <p>Sei il nostro visitatore fortunato del giorno. Hai appena vinto:</p>
+            <div class="prize">100.000 €</div>
+            <p>Il premio è pronto per essere accreditato sul tuo conto. Clicca sul pulsante qui sotto per riscattarlo immediatamente!</p>
+            <button class="btn" id="claim-btn">RISCATTA ORA 💸</button>
+        </div>
+
+        <!-- Schermata del Rickroll (invisibile all'inizio) -->
+        <div id="video-section">
+            <h1 style="color: #ff007f; font-size: 2rem; animation: none;">SEI STATO RICKROLLATO! 🕺</h1>
+            <p style="color: #00ffcc; font-weight: bold;">Nessun milione di euro, ma una hit leggendaria.</p>
+            <div class="video-wrapper">
+                <!-- Usiamo il link MP4 diretto che hai trovato -->
+                <video id="rick-video" controls playsinline>
+                    <source src="https://cdn-useast1.kapwing.com/static/templates/rick-roll-video-meme-template-video-1da252ec.mp4" type="video/mp4">
+                    Il tuo browser non supporta il tag video.
+                </video>
+            </div>
+            <p style="margin-top: 20px; font-size: 0.9rem; color: #888;">Never gonna give you up, never gonna let you down... 😉</p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('claim-btn').addEventListener('click', function() {
+            const promo = document.getElementById('promo-section');
+            const videoSec = document.getElementById('video-section');
+            const video = document.getElementById('rick-video');
+
+            // 1. Scambiamo le schermate
+            promo.style.display = 'none';
+            videoSec.style.display = 'block';
+
+            // 2. Carichiamo e avviamo il video nativo
+            video.load(); // Forza il caricamento del file MP4
+            video.play().catch(function(error) {
+                console.log("Autoplay bloccato, riprovo mutato:", error);
+                video.muted = true;
+                video.play();
+            });
+        });
+    </script>
+
+</body>
+</html>
+
