@@ -369,7 +369,6 @@
       updateUI();
     }
 
-    // Modal bootstrap instance
     const deleteModalEl = document.getElementById('deletePostModal');
     const deleteModal = new bootstrap.Modal(deleteModalEl);
 
@@ -377,6 +376,18 @@
       loadMyPosts();
       deleteModal.show();
     });
+
+    // Helper per formattare Data e Ora
+    function formatPostTimestamp(post) {
+      if (post.date && post.time) {
+        return `${post.date} - ${post.time}`;
+      } else if (post.createdAt) {
+        const d = new Date(post.createdAt);
+        return `${d.toLocaleDateString('it-IT')} - ${d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+      } else {
+        return post.time || 'Data non disponibile';
+      }
+    }
 
     async function loadMyPosts() {
       const container = document.getElementById('my-posts-list');
@@ -404,6 +415,7 @@
 
         container.innerHTML = '';
         myPosts.reverse().forEach(post => {
+          const dateTimeStr = formatPostTimestamp(post);
           const item = document.createElement('div');
           item.className = "d-flex align-items-center justify-content-between p-2 border rounded-3 bg-white shadow-sm";
           item.innerHTML = `
@@ -411,11 +423,11 @@
               <img src="${post.imageUrl}" class="my-post-thumb" alt="${post.catName}">
               <div>
                 <h6 class="mb-0 fw-bold text-dark">${post.catName}</h6>
-                <small class="text-muted">${post.time || ''}</small>
+                <small class="text-muted"><i class="fa-regular fa-calendar-days me-1"></i>${dateTimeStr}</small>
               </div>
             </div>
-            <button class="btn btn-outline-danger btn-sm rounded-3" onclick="confirmAndDeletePost('${post.id}')">
-              <i class="fa-solid fa-trash-can"></i> Elimina
+            <button class="btn btn-outline-danger btn-sm rounded-3 ms-2" onclick="confirmAndDeletePost('${post.id}')">
+              <i class="fa-solid fa-trash-can"></i>
             </button>
           `;
           container.appendChild(item);
@@ -426,21 +438,17 @@
       }
     }
 
-    // Funzione globale di cancellazione con conferma ed eliminazione XP
     window.confirmAndDeletePost = async function(postId) {
       const confirmed = confirm("Sei sicuro di cancellare questo post? Se lo cancelli diminuiranno anche i punti XP perché quando andrai a cancellare il post dal database andrai in automatico anche a cancellare l'XP dell'utente.");
       if (!confirmed) return;
 
       try {
-        // 1. Rimuovi post dal Database
         await remove(ref(db, `cats/${postId}`));
 
-        // 2. Scala XP e contatori gatto dall'utente
         currentUser.xp = Math.max(0, (currentUser.xp || 0) - 100);
         currentUser.catsFound = Math.max(0, (currentUser.catsFound || 0) - 1);
         setCurrentUser(currentUser);
 
-        // 3. Aggiorna DB utente
         await update(ref(db, `users/${currentUser.id}`), {
           xp: currentUser.xp,
           catsFound: currentUser.catsFound
@@ -480,6 +488,7 @@
         if (!result.success) throw new Error("Errore durante il caricamento.");
 
         const imageUrl = result.data.url;
+        const now = new Date();
 
         const newCatRef = push(ref(db, 'cats'));
         await update(newCatRef, {
@@ -487,7 +496,8 @@
           catName: catName,
           imageUrl: imageUrl,
           createdAt: Date.now(),
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          date: now.toLocaleDateString('it-IT'),
+          time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         });
 
         if (!currentUser.badges) currentUser.badges = {};
