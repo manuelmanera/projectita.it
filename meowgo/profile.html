@@ -18,7 +18,6 @@
       color: #3d312a;
     }
 
-    /* GIARDINO REALE - PROPORZIONE VERTICALE REALE (9:16) */
     #garden-container-box {
       width: 100%;
       max-width: 450px;
@@ -131,6 +130,13 @@
       color: white;
     }
 
+    .my-post-thumb {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 0.5rem;
+    }
+
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(6px); }
       to { opacity: 1; transform: translateY(0); }
@@ -165,7 +171,16 @@
     <section id="profile-page" class="page-section active">
       <div class="row g-4 justify-content-center">
         <div class="col-lg-8">
-          <div class="glass-card p-4 mb-4">
+          <div class="glass-card p-4 mb-4 position-relative">
+            
+            <!-- Tasto Cestino in alto a destra -->
+            <button class="btn btn-outline-danger btn-sm position-absolute top-0 end-0 m-3 rounded-circle" 
+                    style="width: 38px; height: 38px;" 
+                    id="open-delete-modal-btn"
+                    title="Gestisci i tuoi post">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+
             <div class="d-flex align-items-center gap-3">
               <div class="avatar-circle">😸</div>
               <div>
@@ -264,12 +279,30 @@
     </section>
   </div>
 
+  <!-- MODAL GESTIONE E CANCELLAZIONE POST -->
+  <div class="modal fade" id="deletePostModal" tabindex="-1" aria-labelledby="deletePostModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content glass-card border-0" style="background: rgba(255, 253, 250, 0.98);">
+        <div class="modal-header border-bottom-0">
+          <h5 class="modal-title fw-bold text-dark" id="deletePostModalLabel">
+            <i class="fa-solid fa-trash text-danger me-2"></i> I tuoi Post Pubblicati
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div id="my-posts-list" class="d-flex flex-column gap-3">
+            <p class="text-center text-muted my-3">Caricamento post...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script type="module">
-    // ---- FIREBASE + HELPER CONDIVISI (duplicati in ogni pagina, file singoli richiesti) ----
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import {
-      getDatabase, ref, push, get, child, update, onValue
+      getDatabase, ref, push, get, child, update, remove, onValue
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
     const IMGBB_API_KEY = "b2bd2cbba6ca0679055dc317aa5bf613";
@@ -297,7 +330,6 @@
       localStorage.removeItem('meowgo_test_user');
     }
 
-    // Costruisce il menù (hamburger) e fa da guardia login
     function renderNavbar(activePage, requireAuth = true) {
       const currentUser = getCurrentUser();
       const navLinks = document.getElementById('nav-links');
@@ -329,7 +361,6 @@
       return currentUser;
     }
 
-    // ---- LOGICA SPECIFICA DELLA PAGINA PROFILO ----
     const currentUser = renderNavbar('profile');
 
     if (currentUser) {
@@ -337,6 +368,91 @@
       document.getElementById('user-email-badge').innerText = currentUser.email;
       updateUI();
     }
+
+    // Modal bootstrap instance
+    const deleteModalEl = document.getElementById('deletePostModal');
+    const deleteModal = new bootstrap.Modal(deleteModalEl);
+
+    document.getElementById('open-delete-modal-btn').addEventListener('click', () => {
+      loadMyPosts();
+      deleteModal.show();
+    });
+
+    async function loadMyPosts() {
+      const container = document.getElementById('my-posts-list');
+      container.innerHTML = '<p class="text-center text-muted my-3">Caricamento post...</p>';
+
+      try {
+        const snapshot = await get(ref(db, 'cats'));
+        if (!snapshot.exists()) {
+          container.innerHTML = '<p class="text-center text-muted my-3">Non hai ancora pubblicato nessun post.</p>';
+          return;
+        }
+
+        const data = snapshot.val();
+        const myPosts = [];
+        for (let key in data) {
+          if (data[key].author === currentUser.username) {
+            myPosts.push({ id: key, ...data[key] });
+          }
+        }
+
+        if (myPosts.length === 0) {
+          container.innerHTML = '<p class="text-center text-muted my-3">Non hai ancora pubblicato nessun post.</p>';
+          return;
+        }
+
+        container.innerHTML = '';
+        myPosts.reverse().forEach(post => {
+          const item = document.createElement('div');
+          item.className = "d-flex align-items-center justify-content-between p-2 border rounded-3 bg-white shadow-sm";
+          item.innerHTML = `
+            <div class="d-flex align-items-center gap-3">
+              <img src="${post.imageUrl}" class="my-post-thumb" alt="${post.catName}">
+              <div>
+                <h6 class="mb-0 fw-bold text-dark">${post.catName}</h6>
+                <small class="text-muted">${post.time || ''}</small>
+              </div>
+            </div>
+            <button class="btn btn-outline-danger btn-sm rounded-3" onclick="confirmAndDeletePost('${post.id}')">
+              <i class="fa-solid fa-trash-can"></i> Elimina
+            </button>
+          `;
+          container.appendChild(item);
+        });
+
+      } catch (err) {
+        container.innerHTML = `<p class="text-danger small my-3">${err.message}</p>`;
+      }
+    }
+
+    // Funzione globale di cancellazione con conferma ed eliminazione XP
+    window.confirmAndDeletePost = async function(postId) {
+      const confirmed = confirm("Sei sicuro di cancellare questo post? Se lo cancelli diminuiranno anche i punti XP perché quando andrai a cancellare il post dal database andrai in automatico anche a cancellare l'XP dell'utente.");
+      if (!confirmed) return;
+
+      try {
+        // 1. Rimuovi post dal Database
+        await remove(ref(db, `cats/${postId}`));
+
+        // 2. Scala XP e contatori gatto dall'utente
+        currentUser.xp = Math.max(0, (currentUser.xp || 0) - 100);
+        currentUser.catsFound = Math.max(0, (currentUser.catsFound || 0) - 1);
+        setCurrentUser(currentUser);
+
+        // 3. Aggiorna DB utente
+        await update(ref(db, `users/${currentUser.id}`), {
+          xp: currentUser.xp,
+          catsFound: currentUser.catsFound
+        });
+
+        updateUI();
+        loadMyPosts();
+
+      } catch (err) {
+        alert("Errore durante l'eliminazione: " + err.message);
+      }
+    };
 
     document.getElementById('upload-form').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -472,3 +588,4 @@
   </script>
 </body>
 </html>
+
