@@ -5,6 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MeowGo - Feed 🐾</title>
 
+  <!-- PWA Manifest & Icone Mobile -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#b45309">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="./icons/icon-512.png">
+
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -244,7 +251,6 @@
       listenToFeed();
     }
 
-    // Helper per formattare Data e Ora
     function formatPostTimestamp(post) {
       if (post.date && post.time) {
         return `${post.date} - ${post.time}`;
@@ -306,6 +312,17 @@
         await update(ref(db, `cats/${postId}/likes`), { [currentUser.id]: true });
       }
     };
+  </script>
+
+  <!-- Registrazione Service Worker per PWA -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('Service Worker attivo:', reg.scope))
+          .catch(err => console.error('Errore SW:', err));
+      });
+    }
   </script>
 </body>
 </html>
