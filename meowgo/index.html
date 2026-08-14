@@ -5,13 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MeowGo - Accedi 🐾</title>
 
-  <!-- PWA Manifest & Icone Mobile -->
+  <!-- PWA & Meta Tag Mobile -->
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#b45309">
+  <meta name="theme-color" content="#007bff">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="apple-touch-icon" href="./icons/icon-512.png">
+  <meta name="apple-mobile-web-app-title" content="MeowGo">
+  <link rel="apple-touch-icon" href="icon-192.png">
 
+  <!-- CSS CDN -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -24,6 +26,7 @@
       color: #3d312a;
     }
 
+    /* GIARDINO REALE - PROPORZIONE VERTICALE REALE (9:16) */
     #garden-container-box {
       width: 100%;
       max-width: 450px;
@@ -205,7 +208,21 @@
     </section>
   </div>
 
+  <!-- JS Bootstrap -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Registrazione Service Worker per PWA -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then((reg) => console.log('Service Worker registrato con successo:', reg.scope))
+          .catch((err) => console.error('Errore registrazione Service Worker:', err));
+      });
+    }
+  </script>
+
+  <!-- Firebase & App Logic -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import {
@@ -237,6 +254,7 @@
       localStorage.removeItem('meowgo_test_user');
     }
 
+    // Costruisce il menù (hamburger) e fa da guardia login
     function renderNavbar(activePage, requireAuth = true) {
       const currentUser = getCurrentUser();
       const navLinks = document.getElementById('nav-links');
@@ -268,6 +286,7 @@
       return currentUser;
     }
 
+    // ---- LOGICA SPECIFICA DELLA PAGINA LOGIN ----
     if (getCurrentUser()) {
       window.location.replace('feed.html');
     } else {
@@ -351,16 +370,6 @@
       }
     });
   </script>
-
-  <!-- Registrazione Service Worker per PWA -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-          .then(reg => console.log('Service Worker attivo:', reg.scope))
-          .catch(err => console.error('Errore SW:', err));
-      });
-    }
-  </script>
 </body>
 </html>
+
