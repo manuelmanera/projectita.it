@@ -1,14 +1,14 @@
 {
-  "short_name": "MiaApp",
-  "name": "La Mia Applicazione Web",
+  "short_name": "MeowGo",
+  "name": "MeowGo",
   "icons": [
     {
-      "src": "icon-192.png",
+      "src": "icons/icon-192.png",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "icon-512.png",
+      "src": "icons/icon-512.png",
       "type": "image/png",
       "sizes": "512x512"
     }
@@ -18,4 +18,3 @@
   "theme_color": "#007bff",
   "display": "standalone"
 }
-
