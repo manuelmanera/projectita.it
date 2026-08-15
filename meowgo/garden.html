@@ -187,7 +187,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import {
-      getDatabase, ref, push, get, child, update, onValue
+      getDatabase, ref, push, get, child, update, onValue, onChildAdded
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
     const IMGBB_API_KEY = "b2bd2cbba6ca0679055dc317aa5bf613";
@@ -250,7 +250,57 @@
 
     if (currentUser) {
       document.getElementById('garden-owner-name').innerText = currentUser.username;
+      checkBanStatus();
+      listenToAdminNotifications();
       listenToMyCats();
+    }
+
+    // --- CONTROLLO BAN UTENTE ---
+    function checkBanStatus() {
+      if (!currentUser || !currentUser.id) return;
+      const userRef = ref(db, 'users/' + currentUser.id);
+      onValue(userRef, (snapshot) => {
+        if (snapshot.exists()) {
+          const userData = snapshot.val();
+          if (userData.bannedUntil) {
+            const isBanned = userData.bannedUntil === 'indefinite' || new Date(userData.bannedUntil) > new Date();
+            if (isBanned) {
+              clearCurrentUser();
+              document.body.innerHTML = `
+                <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; text-align:center; padding:20px; font-family:sans-serif;">
+                  <h1 style="color: #dc2626; font-size: 2.5rem; font-weight: bold;">⛔ ACCOUNT BLOCCATO</h1>
+                  <p style="font-size: 1.2rem; color: #4b5563;">Sei stato sospeso da MeowGo.</p>
+                  <p><strong>Motivo:</strong> ${userData.banReason || 'Violazione delle regole della community'}</p>
+                  <a href="index.html" class="btn btn-warning mt-3">Torna alla Login</a>
+                </div>
+              `;
+            }
+          }
+        }
+      });
+    }
+
+    // --- ASCOLTO NOTIFICHE ADMIN ---
+    function listenToAdminNotifications() {
+      if (!currentUser) return;
+
+      const globalNotifRef = ref(db, 'notifications/global');
+      onChildAdded(globalNotifRef, (snapshot) => {
+        const notif = snapshot.val();
+        if (notif && notif.title) {
+          alert("📢 COMUNICAZIONE STAFF:\n\n" + notif.title + "\n" + (notif.message || ''));
+        }
+      });
+
+      if (currentUser.id) {
+        const directNotifRef = ref(db, 'notifications/direct/' + currentUser.id);
+        onChildAdded(directNotifRef, (snapshot) => {
+          const notif = snapshot.val();
+          if (notif && notif.title) {
+            alert("🔔 MESSAGGIO PRIVATO DALLO STAFF:\n\n" + notif.title + "\n" + (notif.message || ''));
+          }
+        });
+      }
     }
 
     let myCatImageUrls = [];
@@ -262,7 +312,8 @@
         if (snapshot.exists()) {
           const data = snapshot.val();
           Object.values(data).forEach((post) => {
-            if (currentUser && post.author === currentUser.username && post.imageUrl) {
+            // Ignora post eliminati
+            if (currentUser && post.author === currentUser.username && post.imageUrl && post.deleted !== true) {
               myCatImageUrls.push(post.imageUrl);
             }
           });
