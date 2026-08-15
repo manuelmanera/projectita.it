@@ -1,0 +1,15 @@
+{
+  "name": "MeowGo Admin PWA",
+  "short_name": "Admin",
+  "start_url": "./admin.html",
+  "display": "standalone",
+  "background_color": "#0c100d",
+  "theme_color": "#00ff66",
+  "icons": [
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cGF0aCBmaWxsPSIjMDBmZjY2IiBkPSJNMjU2IDhDMTE5IDggOCAxMTkgOCAyNTZzMTExIDI0OCAyNDggMjQ4IDI0OC0xMTEgMjQ4LTI0OFMxOTMgOCAyNTYgOHptMCA0NDhjLTExMCAwLTIwMC05MC0yMDAtMjAwUzE0NiA1NiAyNTYgNTZzMjAwIDkwIDIwMCAyMDAtOTAgMjAwLTIwMCAyMDB6Ii8+PC9zdmc+",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}
