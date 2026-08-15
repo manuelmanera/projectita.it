@@ -450,24 +450,37 @@
       });
     }
 
-    // --- ASCOLTO NOTIFICHE ADMIN ---
+    // --- ASCOLTO NOTIFICHE ADMIN (AGGIORNATO PER EVITARE LOOP) ---
     function listenToAdminNotifications() {
       if (!currentUser) return;
 
+      // Gestione notifiche globali (usiamo localStorage per ricordarci quelle già viste)
       const globalNotifRef = ref(db, 'notifications/global');
       onChildAdded(globalNotifRef, (snapshot) => {
         const notif = snapshot.val();
-        if (notif && notif.title) {
+        const notifId = snapshot.key;
+        const lastSeenGlobal = localStorage.getItem('meowgo_last_seen_global') || '';
+
+        if (notif && notif.title && notifId !== lastSeenGlobal) {
           alert("📢 COMUNICAZIONE STAFF:\n\n" + notif.title + "\n" + (notif.message || ''));
+          localStorage.setItem('meowgo_last_seen_global', notifId);
         }
       });
 
+      // Gestione notifiche dirette (utente specifico con flag read: true)
       if (currentUser.id) {
         const directNotifRef = ref(db, 'notifications/direct/' + currentUser.id);
         onChildAdded(directNotifRef, (snapshot) => {
           const notif = snapshot.val();
-          if (notif && notif.title) {
+          const notifId = snapshot.key;
+          
+          if (notif && notif.title && notif.read !== true) {
             alert("🔔 MESSAGGIO PRIVATO DALLO STAFF:\n\n" + notif.title + "\n" + (notif.message || ''));
+            
+            // Segna la notifica come letta nel database in modo che non compaia più
+            update(ref(db, `notifications/direct/${currentUser.id}/${notifId}`), {
+              read: true
+            }).catch(err => console.error("Errore aggiornamento stato notifica:", err));
           }
         });
       }
@@ -506,7 +519,6 @@
         const data = snapshot.val();
         const myPosts = [];
         for (let key in data) {
-          // Esclude post marcati come eliminati dall'admin
           if (data[key].author === currentUser.username && data[key].deleted !== true) {
             myPosts.push({ id: key, ...data[key] });
           }
