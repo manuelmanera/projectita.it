@@ -37,7 +37,40 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// Gestione Notifiche: risposta al click dell'utente sulla notifica
+// ==========================================
+// RICEZIONE NOTIFICHE PUSH (CENTRO NOTIFICHE SISTEMA)
+// ==========================================
+self.addEventListener('push', (event) => {
+  let data = {};
+
+  if (event.data) {
+    try {
+      data = event.data.json();
+    } catch (e) {
+      data = { title: "MeowGo", body: event.data.text() };
+    }
+  }
+
+  // Estrazione dati dal payload FCM o personalizzato
+  const title = data.title || data.notification?.title || 'Nuova Notifica MeowGo';
+  const options = {
+    body: data.body || data.message || data.notification?.body || 'Hai una nuova notifica!',
+    icon: './icons/icon-192.png',
+    badge: './icons/icon-192.png',
+    vibrate: [100, 50, 100],
+    data: {
+      url: data.url || data.data?.url || './garden.html'
+    }
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(title, options)
+  );
+});
+
+// ==========================================
+// GESTIONE CLICK SULLA NOTIFICA
+// ==========================================
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
