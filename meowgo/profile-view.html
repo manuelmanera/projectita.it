@@ -49,15 +49,27 @@
       opacity: 0.85;
       transform: scale(0.98);
     }
+    .badge-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 8px;
+      background: #fff;
+      border-radius: 12px;
+      border: 1px solid rgba(210, 180, 140, 0.3);
+      width: 85px;
+    }
     .badge-icon-box {
-      font-size: 1.4rem;
+      font-size: 1.3rem;
       background: #fffbeb;
       border: 1px solid #f59e0b;
       border-radius: 50%;
-      width: 45px; height: 45px;
+      width: 40px; height: 40px;
       display: flex; align-items: center; justify-content: center;
       color: #b45309;
-      box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
+      margin-bottom: 4px;
+      box-shadow: 0 2px 6px rgba(245, 158, 11, 0.2);
     }
     .ig-modal-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -88,7 +100,7 @@
 
     <div class="row justify-content-center">
       <div class="col-lg-8">
-        <!-- Info Profilo -->
+        <!-- Info Profilo, XP e Livello -->
         <div class="glass-card p-4 mb-4 text-center">
           <div class="d-flex justify-content-center mb-3">
             <div id="profile-avatar-container">
@@ -96,10 +108,18 @@
             </div>
           </div>
           <h3 class="fw-bold mb-1" id="profile-username">Caricamento...</h3>
-          <p class="text-muted small mb-3">Utente di MeowGo</p>
+          <p class="text-muted small mb-3" id="profile-level-text">Livello - • - XP</p>
+
+          <!-- Barra Progresso XP -->
+          <div class="px-4 mb-4">
+            <div class="progress" style="height: 10px; border-radius: 5px;">
+              <div id="profile-xp-bar" class="progress-bar bg-warning" role="progressbar" style="width: 0%;"></div>
+            </div>
+            <small class="text-muted mt-1 d-block" id="profile-xp-detail">0 / 100 XP</small>
+          </div>
 
           <div class="mt-3">
-            <h6 class="fw-bold text-dark mb-2"><i class="fa-solid fa-award text-warning"></i> Badge Utente</h6>
+            <h6 class="fw-bold text-dark mb-2"><i class="fa-solid fa-award text-warning"></i> Badge & Traguardi</h6>
             <div class="d-flex justify-content-center gap-2 flex-wrap" id="profile-badges">
               <span class="text-muted small">Nessun badge sbloccato</span>
             </div>
@@ -169,18 +189,40 @@
       if (usersSnap.exists()) {
         const users = usersSnap.val();
         const userEntry = Object.values(users).find(u => u.username === targetUsername);
+        
         if (userEntry) {
+          // Avatar
           if (userEntry.avatarUrl) {
             document.getElementById('profile-avatar-container').innerHTML = `<img src="${userEntry.avatarUrl}" class="avatar-circle">`;
           } else {
             document.getElementById('profile-initial').innerText = targetUsername.charAt(0).toUpperCase();
           }
 
+          // XP e Livello
+          const xp = userEntry.xp || 0;
+          const level = Math.floor(xp / 100) + 1;
+          const xpInLevel = xp % 100;
+          
+          document.getElementById('profile-level-text').innerText = `Livello ${level} • ${xp} XP totali`;
+          document.getElementById('profile-xp-bar.style').width = `${xpInLevel}%`;
+          document.getElementById('profile-xp-bar').style.width = `${xpInLevel}%`;
+          document.getElementById('profile-xp-detail').innerText = `${xpInLevel} / 100 XP al prossimo livello`;
+
+          // Badge / Achievements
           if (userEntry.badges) {
             const badgesContainer = document.getElementById('profile-badges');
             badgesContainer.innerHTML = '';
-            Object.keys(userEntry.badges).forEach(badgeKey => {
-              badgesContainer.innerHTML += `<div class="badge-icon-box" title="${badgeKey}"><i class="fa-solid fa-medal"></i></div>`;
+            
+            Object.entries(userEntry.badges).forEach(([badgeKey, badgeData]) => {
+              const title = badgeData.title || badgeKey;
+              const icon = badgeData.icon || 'fa-medal';
+              
+              badgesContainer.innerHTML += `
+                <div class="badge-item" title="${title}">
+                  <div class="badge-icon-box"><i class="fa-solid ${icon}"></i></div>
+                  <span class="small fw-bold text-dark text-truncate w-100">${title}</span>
+                </div>
+              `;
             });
           }
         } else {
@@ -188,6 +230,7 @@
         }
       }
 
+      // Caricamento Post
       const postsSnap = await get(ref(db, 'cats'));
       const gridContainer = document.getElementById('user-posts-grid');
       gridContainer.innerHTML = '';
