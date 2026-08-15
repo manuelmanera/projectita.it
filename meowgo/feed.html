@@ -144,7 +144,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import {
-      getDatabase, ref, get, update, onValue
+      getDatabase, ref, get, update, onValue, onChildAdded
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
     const firebaseConfig = {
@@ -190,7 +190,59 @@
     }
 
     const currentUser = renderNavbar('feed');
-    if (currentUser) listenToFeed();
+    if (currentUser) {
+      checkBanStatus();
+      listenToAdminNotifications();
+      listenToFeed();
+    }
+
+    // --- CONTROLLO BAN UTENTE ---
+    function checkBanStatus() {
+      if (!currentUser || !currentUser.id) return;
+      const userRef = ref(db, 'users/' + currentUser.id);
+      onValue(userRef, (snapshot) => {
+        if (snapshot.exists()) {
+          const userData = snapshot.val();
+          if (userData.bannedUntil) {
+            const isBanned = userData.bannedUntil === 'indefinite' || new Date(userData.bannedUntil) > new Date();
+            if (isBanned) {
+              clearCurrentUser();
+              document.body.innerHTML = `
+                <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; text-align:center; padding:20px; font-family:sans-serif;">
+                  <h1 style="color: #dc2626; font-size: 2.5rem; font-weight: bold;">⛔ ACCOUNT BLOCCATO</h1>
+                  <p style="font-size: 1.2rem; color: #4b5563;">Sei stato sospeso da MeowGo.</p>
+                  <p><strong>Motivo:</strong> ${userData.banReason || 'Violazione delle regole della community'}</p>
+                  <a href="index.html" class="btn btn-warning mt-3">Torna alla Login</a>
+                </div>
+              `;
+            }
+          }
+        }
+      });
+    }
+
+    // --- ASCOLTO NOTIFICHE ADMIN ---
+    function listenToAdminNotifications() {
+      if (!currentUser) return;
+      
+      const globalNotifRef = ref(db, 'notifications/global');
+      onChildAdded(globalNotifRef, (snapshot) => {
+        const notif = snapshot.val();
+        if (notif && notif.title) {
+          alert("📢 COMUNICAZIONE STAFF:\n\n" + notif.title + "\n" + (notif.message || ''));
+        }
+      });
+
+      if (currentUser.id) {
+        const directNotifRef = ref(db, 'notifications/direct/' + currentUser.id);
+        onChildAdded(directNotifRef, (snapshot) => {
+          const notif = snapshot.val();
+          if (notif && notif.title) {
+            alert("🔔 MESSAGGIO PRIVATO DALLO STAFF:\n\n" + notif.title + "\n" + (notif.message || ''));
+          }
+        });
+      }
+    }
 
     function formatPostTimestamp(post) {
       if (post.date && post.time) {
@@ -213,6 +265,9 @@
           const catList = Object.keys(data).map(key => ({ id: key, ...data[key] })).reverse();
 
           catList.forEach((post) => {
+            // CONTROLLO CANCELLAZIONE ADMIN: Se il post è stato cancellato, non mostrarlo
+            if (post.deleted === true) return;
+
             const likesMap = post.likes || {};
             const likesCount = Object.keys(likesMap).length;
             const isLiked = currentUser && likesMap[currentUser.id];
