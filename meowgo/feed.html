@@ -24,31 +24,6 @@
       color: #3d312a;
     }
 
-    #garden-container-box {
-      width: 100%;
-      max-width: 450px;
-      aspect-ratio: 9 / 16;
-      margin: 0 auto;
-      position: relative;
-      background-image: url('https://i.ibb.co/93HyWQJ1/1784837930021.jpg');
-      background-size: cover;
-      background-repeat: no-repeat;
-      background-position: center;
-      border: 8px solid #3d2314;
-      border-radius: 1.5rem;
-      overflow: hidden;
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.35);
-    }
-
-    #cats-canvas {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 2;
-    }
-
     .glass-card {
       background: rgba(255, 253, 250, 0.92);
       backdrop-filter: blur(14px);
@@ -58,24 +33,25 @@
       box-shadow: 0 10px 30px rgba(80, 50, 20, 0.1);
     }
 
+    /* Navbar Sticky con animazione al nav-scroll */
     .navbar-glass {
       background: rgba(255, 253, 250, 0.9);
       backdrop-filter: blur(10px);
       border-bottom: 1px solid rgba(210, 180, 140, 0.3);
+      position: sticky;
+      top: 0;
+      z-index: 1030;
+      transition: transform 0.3s ease-in-out;
     }
 
-    .avatar-circle {
-      width: 70px; height: 70px;
-      background: linear-gradient(45deg, #d97706, #b45309);
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 2.2rem;
-      border: 3px solid #fff;
-      color: white;
+    /* Classe applicata via JS per nascondere la Navbar */
+    .navbar-hidden {
+      transform: translateY(-100%);
     }
 
     .cat-post-img {
-      width: 100%; height: 350px;
+      width: 100%;
+      height: 350px;
       object-fit: cover;
     }
 
@@ -84,47 +60,6 @@
 
     .btn-like { color: #8c7a6b; transition: transform 0.2s; }
     .btn-like.liked { color: #dc2626; transform: scale(1.1); }
-
-    .auth-toggle-btn { cursor: pointer; color: #b45309; font-weight: bold; text-decoration: underline; }
-
-    .badge-card {
-      background: rgba(245, 238, 230, 0.8);
-      border-radius: 1rem;
-      padding: 8px 4px;
-      text-align: center;
-      border: 2px solid transparent;
-      transition: all 0.3s ease;
-      filter: grayscale(100%);
-      opacity: 0.35;
-    }
-
-    .badge-card.unlocked {
-      filter: grayscale(0%);
-      opacity: 1;
-      background: #fff;
-      border-color: #f59e0b;
-      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
-    }
-
-    .secret-badge-col { display: none; }
-
-    .secret-badge-col.unlocked {
-      display: block;
-      animation: popIn 0.4s ease-out;
-    }
-
-    .secret-badge-col.unlocked .badge-card {
-      filter: grayscale(0%);
-      opacity: 1;
-      background: #fffbeb;
-      border-color: #b45309;
-      box-shadow: 0 4px 12px rgba(180, 83, 9, 0.3);
-    }
-
-    .badge-icon {
-      font-size: 1.6rem;
-      margin-bottom: 2px;
-    }
 
     .btn-earth {
       background: linear-gradient(45deg, #88502f, #b45309);
@@ -136,7 +71,7 @@
       color: white;
     }
 
-    /* Pulsanti d'azione circolari */
+    /* Pulsanti d'azione circolari coordinati */
     .icon-btn-action {
       width: 42px;
       height: 42px;
@@ -157,11 +92,6 @@
       from { opacity: 0; transform: translateY(6px); }
       to { opacity: 1; transform: translateY(0); }
     }
-
-    @keyframes popIn {
-      0% { transform: scale(0.5); opacity: 0; }
-      100% { transform: scale(1); opacity: 1; }
-    }
   </style>
 </head>
 <body class="pb-5">
@@ -169,7 +99,8 @@
     if (!localStorage.getItem('meowgo_test_user')) location.replace('index.html');
   </script>
 
-  <nav class="navbar navbar-expand-lg navbar-light sticky-top navbar-glass mb-4 position-relative z-3">
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-light navbar-glass mb-4">
     <div class="container">
       <a class="navbar-brand fw-black fs-3 text-dark d-flex align-items-center gap-2" href="feed.html">
         <i class="fa-solid fa-cat" style="color: #b45309;"></i> MeowGo
@@ -194,7 +125,7 @@
               <i class="fa-solid fa-earth-americas" style="color: #b45309;"></i> Community Feed
             </h3>
             
-            <!-- Gruppo Pulsanti Azione (Nuovo Avvistamento + Calendario) -->
+            <!-- Pulsanti di azione (Nuovo Avvistamento + Calendario) -->
             <div class="d-flex align-items-center gap-2">
               <a href="profile.html" class="btn btn-earth icon-btn-action shadow-sm" title="Nuovo Avvistamento">
                 <i class="fa-solid fa-plus"></i>
@@ -215,10 +146,8 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import {
-      getDatabase, ref, push, get, child, update, onValue
+      getDatabase, ref, get, update, onValue
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-
-    const IMGBB_API_KEY = "b2bd2cbba6ca0679055dc317aa5bf613";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDAwgqotGF0BTUGBjxOMseMMfXpBZdAUTI",
@@ -236,14 +165,11 @@
     function getCurrentUser() {
       return JSON.parse(localStorage.getItem('meowgo_test_user')) || null;
     }
-    function setCurrentUser(user) {
-      localStorage.setItem('meowgo_test_user', JSON.stringify(user));
-    }
     function clearCurrentUser() {
       localStorage.removeItem('meowgo_test_user');
     }
 
-    function renderNavbar(activePage, requireAuth = true) {
+    function renderNavbar(activePage) {
       const currentUser = getCurrentUser();
       const navLinks = document.getElementById('nav-links');
 
@@ -254,31 +180,19 @@
           <li class="nav-item"><a class="nav-link fw-bold ${activePage === 'profile' ? 'text-warning' : 'text-dark'}" href="profile.html"><i class="fa-solid fa-user"></i> Profilo (${currentUser.username})</a></li>
           <li class="nav-item"><a class="nav-link fw-bold text-danger" href="#" id="logout-link"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
         `;
-        const logoutLink = document.getElementById('logout-link');
-        if (logoutLink) {
-          logoutLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            clearCurrentUser();
-            window.location.href = 'index.html';
-          });
-        }
+        document.getElementById('logout-link')?.addEventListener('click', (e) => {
+          e.preventDefault();
+          clearCurrentUser();
+          window.location.href = 'index.html';
+        });
       } else {
-        navLinks.innerHTML = `
-          <li class="nav-item"><a class="nav-link fw-bold text-dark" href="index.html"><i class="fa-solid fa-right-to-bracket"></i> Accedi</a></li>
-        `;
-        if (requireAuth && activePage !== 'login') {
-          window.location.replace('index.html');
-        }
+        window.location.replace('index.html');
       }
-
       return currentUser;
     }
 
     const currentUser = renderNavbar('feed');
-
-    if (currentUser) {
-      listenToFeed();
-    }
+    if (currentUser) listenToFeed();
 
     function formatPostTimestamp(post) {
       if (post.date && post.time) {
@@ -286,9 +200,8 @@
       } else if (post.createdAt) {
         const d = new Date(post.createdAt);
         return `${d.toLocaleDateString('it-IT')} - ${d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
-      } else {
-        return post.time || '';
       }
+      return post.time || '';
     }
 
     function listenToFeed() {
@@ -343,28 +256,22 @@
     };
   </script>
 
-  <!-- Registrazione Service Worker per PWA -->
+  <!-- Script per nascondere/mostrare la Navbar allo scroll -->
   <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-          .then(reg => console.log('Service Worker attivo:', reg.scope))
-          .catch(err => console.error('Errore SW:', err));
-      });
-    }
-  </script>
-  <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', async () => {
-      try {
-        const reg = await navigator.serviceWorker.register('./firebase-messaging-sw.js', { scope: './' });
-        console.log('Service Worker registrato con successo:', reg);
-      } catch (err) {
-        console.error('Errore registrazione Service Worker:', err);
-      }
-    });
-  }
-  </script>
+    let lastScrollTop = 0;
+    const navbar = document.querySelector('.navbar');
 
+    window.addEventListener('scroll', () => {
+      let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      if (scrollTop < 0) scrollTop = 0;
+
+      if (scrollTop > lastScrollTop && scrollTop > 50) {
+        navbar.classList.add('navbar-hidden');
+      } else {
+        navbar.classList.remove('navbar-hidden');
+      }
+      lastScrollTop = scrollTop;
+    });
+  </script>
 </body>
 </html>
