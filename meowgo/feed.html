@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MeowGo - Feed 🐾</title>
 
-  <!-- PWA Manifest & Icone Mobile -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#b45309">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -41,12 +40,6 @@
       position: sticky;
       top: 0;
       z-index: 1030;
-      transition: transform 0.3s ease-in-out;
-      will-change: transform;
-    }
-
-    .navbar-hidden {
-      transform: translateY(-100%);
     }
 
     .cat-post-img {
@@ -54,9 +47,6 @@
       height: 350px;
       object-fit: cover;
     }
-
-    .page-section { display: none; }
-    .page-section.active { display: block; animation: fadeIn 0.3s ease-in-out; }
 
     .btn-like { color: #8c7a6b; transition: transform 0.2s; }
     .btn-like.liked { color: #dc2626; transform: scale(1.1); }
@@ -86,11 +76,6 @@
       transform: scale(1.08);
       box-shadow: 0 4px 12px rgba(180, 83, 9, 0.3);
     }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
   </style>
 </head>
 <body class="pb-5">
@@ -118,12 +103,16 @@
       <div class="row justify-content-center">
         <div class="col-lg-7">
           
+          <!-- INTESTAZIONE CON PULSANTE LENTE ACCANTO AL + E AL CALENDARIO -->
           <div class="d-flex justify-content-between align-items-center mb-4">
             <h3 class="fw-bold mb-0 text-dark">
               <i class="fa-solid fa-earth-americas" style="color: #b45309;"></i> Community Feed
             </h3>
             
             <div class="d-flex align-items-center gap-2">
+              <a href="search.html" class="btn btn-earth icon-btn-action shadow-sm" title="Cerca Utenti">
+                <i class="fa-solid fa-magnifying-glass"></i>
+              </a>
               <a href="profile.html" class="btn btn-earth icon-btn-action shadow-sm" title="Nuovo Avvistamento">
                 <i class="fa-solid fa-plus"></i>
               </a>
@@ -144,9 +133,6 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, get, update, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-    
-    // Importiamo la funzione per inviare la notifica di post pubblicato (opzionale se gestita al momento della creazione in profile/garden)
-    import { sendPostPublishedNotification } from "./notifications.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDAwgqotGF0BTUGBjxOMseMMfXpBZdAUTI",
@@ -192,33 +178,7 @@
 
     const currentUser = renderNavbar('feed');
     if (currentUser) {
-      checkBanStatus();
       listenToFeed();
-    }
-
-    // --- CONTROLLO BAN UTENTE ---
-    function checkBanStatus() {
-      if (!currentUser || !currentUser.id) return;
-      const userRef = ref(db, 'users/' + currentUser.id);
-      onValue(userRef, (snapshot) => {
-        if (snapshot.exists()) {
-          const userData = snapshot.val();
-          if (userData.bannedUntil) {
-            const isBanned = userData.bannedUntil === 'indefinite' || new Date(userData.bannedUntil) > new Date();
-            if (isBanned) {
-              clearCurrentUser();
-              document.body.innerHTML = `
-                <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; text-align:center; padding:20px; font-family:sans-serif;">
-                  <h1 style="color: #dc2626; font-size: 2.5rem; font-weight: bold;">⛔ ACCOUNT BLOCCATO</h1>
-                  <p style="font-size: 1.2rem; color: #4b5563;">Sei stato sospeso da MeowGo.</p>
-                  <p><strong>Motivo:</strong> ${userData.banReason || 'Violazione delle regole della community'}</p>
-                  <a href="index.html" class="btn btn-warning mt-3">Torna alla Login</a>
-                </div>
-              `;
-            }
-          }
-        }
-      });
     }
 
     function formatPostTimestamp(post) {
@@ -253,7 +213,9 @@
             card.className = "glass-card overflow-hidden";
             card.innerHTML = `
               <div class="p-3 d-flex align-items-center gap-2 border-bottom">
-                <div class="fw-bold text-dark"><i class="fa-solid fa-circle-user text-warning"></i> ${post.author}</div>
+                <div class="fw-bold text-dark" style="cursor: pointer;" onclick="window.location.href='profile-view.html?user=${encodeURIComponent(post.author)}'">
+                  <i class="fa-solid fa-circle-user text-warning"></i> ${post.author}
+                </div>
                 <span class="small text-muted ms-auto"><i class="fa-regular fa-calendar-days me-1"></i>${dateTimeStr}</span>
               </div>
               <img src="${post.imageUrl}" class="cat-post-img" alt="${post.catName}">
@@ -284,36 +246,5 @@
       }
     };
   </script>
-
-  <!-- Script Mobile-Optimized per nascondere/mostrare la Navbar -->
-  <script>
-    let lastScrollTop = 0;
-    const navbar = document.querySelector('.navbar');
-    const delta = 10;
-
-    window.addEventListener('scroll', () => {
-      let scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop;
-      let bodyHeight = document.documentElement.scrollHeight;
-      let windowHeight = window.innerHeight;
-
-      if (scrollTop <= 0 || scrollTop + windowHeight >= bodyHeight) {
-        navbar.classList.remove('navbar-hidden');
-        return;
-      }
-
-      if (Math.abs(lastScrollTop - scrollTop) <= delta) return;
-
-      if (scrollTop > lastScrollTop && scrollTop > 60) {
-        navbar.classList.add('navbar-hidden');
-      } else {
-        navbar.classList.remove('navbar-hidden');
-      }
-
-      lastScrollTop = scrollTop;
-    }, { passive: true });
-  </script>
-
-  <!-- Inclusione script notifiche centralizzato -->
-  <script type="module" src="./notifications.js"></script>
 </body>
 </html>
