@@ -1,6 +1,6 @@
 {
   "short_name": "MeowGo",
-  "name": "MeowGo",
+  "name": "MeowGo - Cat Community",
   "icons": [
     {
       "src": "icons/icon-192.png",
@@ -17,6 +17,24 @@
   ],
   "start_url": "./index.html",
   "background_color": "#ffffff",
-  "theme_color": "#007bff",
-  "display": "standalone"
+  "theme_color": "#b45309",
+  "display": "standalone",
+  "orientation": "portrait",
+  "shortcuts": [
+    {
+      "name": "MeowGarden",
+      "short_name": "Giardino",
+      "description": "Accedi direttamente al tuo MeowGarden",
+      "url": "./garden.html",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Profilo, XP & Badge",
+      "short_name": "Profilo",
+      "description": "Vedi il tuo livello XP e i badge sbloccati",
+      "url": "./profile.html",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
 }
+
