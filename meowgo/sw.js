@@ -1,10 +1,11 @@
-const CACHE_NAME = 'meowgo-v2';
+const CACHE_NAME = 'meowgo-v3';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './feed.html',
   './garden.html',
   './profile.html',
+  './calendar.html',
   './manifest.json',
   './tracker.js',
   './icons/icon-192.png',
