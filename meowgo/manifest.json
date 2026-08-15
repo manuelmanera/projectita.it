@@ -1,25 +1,39 @@
 {
   "short_name": "MeowGo",
   "name": "MeowGo - Cat Community",
-  "icons": [
-    {
-      "src": "icons/icon-192.png",
-      "type": "image/png",
-      "sizes": "192x192",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "icons/icon-512.png",
-      "type": "image/png",
-      "sizes": "512x512",
-      "purpose": "any maskable"
-    }
-  ],
+  "id": "com.meowgo.app",
+  "scope": "./",
   "start_url": "./index.html",
   "background_color": "#ffffff",
   "theme_color": "#b45309",
   "display": "standalone",
   "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
+    }
+  ],
   "shortcuts": [
     {
       "name": "MeowGarden",
@@ -37,4 +51,3 @@
     }
   ]
 }
-
