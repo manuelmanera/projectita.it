@@ -1,6 +1,6 @@
 const CACHE_NAME = 'meowgo-admin-v1';
 const ASSETS = [
-  './admin.html',
+  './index.html',
   './manifest.json',
   'https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
