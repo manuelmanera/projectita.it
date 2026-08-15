@@ -36,6 +36,13 @@
   ],
   "shortcuts": [
     {
+      "name": "Calendario Avvistamenti",
+      "short_name": "Calendario",
+      "description": "Visualizza il calendario degli avvistamenti",
+      "url": "./calendar.html",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
       "name": "MeowGarden",
       "short_name": "Giardino",
       "description": "Accedi direttamente al tuo MeowGarden",
