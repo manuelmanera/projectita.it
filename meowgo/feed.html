@@ -33,18 +33,19 @@
       box-shadow: 0 10px 30px rgba(80, 50, 20, 0.1);
     }
 
-    /* Navbar Sticky con animazione al nav-scroll */
+    /* Navbar Sticky per Mobile e Desktop */
     .navbar-glass {
-      background: rgba(255, 253, 250, 0.9);
+      background: rgba(255, 253, 250, 0.95);
       backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       border-bottom: 1px solid rgba(210, 180, 140, 0.3);
       position: sticky;
       top: 0;
       z-index: 1030;
       transition: transform 0.3s ease-in-out;
+      will-change: transform;
     }
 
-    /* Classe applicata via JS per nascondere la Navbar */
     .navbar-hidden {
       transform: translateY(-100%);
     }
@@ -71,7 +72,6 @@
       color: white;
     }
 
-    /* Pulsanti d'azione circolari coordinati */
     .icon-btn-action {
       width: 42px;
       height: 42px;
@@ -119,13 +119,11 @@
       <div class="row justify-content-center">
         <div class="col-lg-7">
           
-          <!-- Header della Sezione Feed -->
           <div class="d-flex justify-content-between align-items-center mb-4">
             <h3 class="fw-bold mb-0 text-dark">
               <i class="fa-solid fa-earth-americas" style="color: #b45309;"></i> Community Feed
             </h3>
             
-            <!-- Pulsanti di azione (Nuovo Avvistamento + Calendario) -->
             <div class="d-flex align-items-center gap-2">
               <a href="profile.html" class="btn btn-earth icon-btn-action shadow-sm" title="Nuovo Avvistamento">
                 <i class="fa-solid fa-plus"></i>
@@ -256,22 +254,32 @@
     };
   </script>
 
-  <!-- Script per nascondere/mostrare la Navbar allo scroll -->
+  <!-- Script Mobile-Optimized per nascondere/mostrare la Navbar -->
   <script>
     let lastScrollTop = 0;
     const navbar = document.querySelector('.navbar');
+    const delta = 10;
 
     window.addEventListener('scroll', () => {
-      let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-      if (scrollTop < 0) scrollTop = 0;
+      let scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop;
+      let bodyHeight = document.documentElement.scrollHeight;
+      let windowHeight = window.innerHeight;
 
-      if (scrollTop > lastScrollTop && scrollTop > 50) {
+      if (scrollTop <= 0 || scrollTop + windowHeight >= bodyHeight) {
+        navbar.classList.remove('navbar-hidden');
+        return;
+      }
+
+      if (Math.abs(lastScrollTop - scrollTop) <= delta) return;
+
+      if (scrollTop > lastScrollTop && scrollTop > 60) {
         navbar.classList.add('navbar-hidden');
       } else {
         navbar.classList.remove('navbar-hidden');
       }
+
       lastScrollTop = scrollTop;
-    });
+    }, { passive: true });
   </script>
 </body>
 </html>
