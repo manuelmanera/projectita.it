@@ -302,6 +302,41 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Sistema Notifiche PWA -->
+  <script>
+    // Richiede il permesso appena la pagina viene aperta
+    if ('Notification' in window && Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+      Notification.requestPermission();
+    }
+
+    // Funzione globale per inviare le notifiche
+    window.notifyUser = function(title, body, url = './feed.html') {
+      if ('Notification' in window && Notification.permission === 'granted') {
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.ready.then(reg => {
+            reg.showNotification(title, {
+              body: body,
+              icon: './icons/icon-512.png',
+              badge: './icons/icon-512.png',
+              vibrate: [100, 50, 100],
+              data: { url: url }
+            });
+          });
+        } else {
+          new Notification(title, { body: body, icon: './icons/icon-512.png' });
+        }
+      }
+    };
+
+    // Imposta il badge sull'icona dell'app della Home
+    window.setAppBadgeCount = function(count = 1) {
+      if ('setAppBadge' in navigator) {
+        navigator.setAppBadge(count).catch(err => console.log(err));
+      }
+    };
+  </script>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import {
@@ -550,9 +585,25 @@
 
         updateUI();
 
+        // INVIA LA NOTIFICA E IL BADGE ALL'ICONA
+        if (window.notifyUser) {
+          if (unlockedSecret) {
+            window.notifyUser("🏆 Badge Segreto Sbloccato!", `Hai appena sbloccato un badge speciale con ${catName}!`, "./feed.html");
+          } else {
+            window.notifyUser("📸 Gatto Registrato!", `Hai aggiunto ${catName} al DB! +100 XP guadagnati.`, "./feed.html");
+          }
+        }
+        if (window.setAppBadgeCount) {
+          window.setAppBadgeCount(1);
+        }
+
         nameInput.value = '';
         photoInput.value = '';
-        window.location.href = 'feed.html';
+        
+        // Ritardo di 500ms prima di cambiare pagina per consentire l'emissione del banner
+        setTimeout(() => {
+          window.location.href = 'feed.html';
+        }, 500);
 
       } catch (err) {
         alert(err.message);
