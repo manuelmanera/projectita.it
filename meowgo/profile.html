@@ -305,7 +305,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, push, get, child, update, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getDatabase, ref, push, get, child, update, remove, onValue, onChildAdded } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
     import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js";
 
     const IMGBB_API_KEY = "b2bd2cbba6ca0679055dc317aa5bf613";
@@ -340,14 +340,12 @@
       console.warn("FCM non supportato in questo browser:", e);
     }
 
-    // Gestione messaggi nativi mentre l'app è aperta
     if (messaging) {
       onMessage(messaging, (payload) => {
         sendNativeNotification(payload.notification.title, payload.notification.body, payload.notification.image);
       });
     }
 
-    // Funzione Helper per inviare la Notifica Nativa Strutturata
     async function sendNativeNotification(title, body, imageUrl = null) {
       if (!('Notification' in window) || Notification.permission !== 'granted') return;
 
@@ -422,7 +420,57 @@
     if (currentUser) {
       document.getElementById('user-display-name').innerText = currentUser.username;
       document.getElementById('user-email-badge').innerText = currentUser.email;
+      checkBanStatus();
+      listenToAdminNotifications();
       updateUI();
+    }
+
+    // --- CONTROLLO BAN UTENTE ---
+    function checkBanStatus() {
+      if (!currentUser || !currentUser.id) return;
+      const userRef = ref(db, 'users/' + currentUser.id);
+      onValue(userRef, (snapshot) => {
+        if (snapshot.exists()) {
+          const userData = snapshot.val();
+          if (userData.bannedUntil) {
+            const isBanned = userData.bannedUntil === 'indefinite' || new Date(userData.bannedUntil) > new Date();
+            if (isBanned) {
+              clearCurrentUser();
+              document.body.innerHTML = `
+                <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; text-align:center; padding:20px; font-family:sans-serif;">
+                  <h1 style="color: #dc2626; font-size: 2.5rem; font-weight: bold;">⛔ ACCOUNT BLOCCATO</h1>
+                  <p style="font-size: 1.2rem; color: #4b5563;">Sei stato sospeso da MeowGo.</p>
+                  <p><strong>Motivo:</strong> ${userData.banReason || 'Violazione delle regole della community'}</p>
+                  <a href="index.html" class="btn btn-warning mt-3">Torna alla Login</a>
+                </div>
+              `;
+            }
+          }
+        }
+      });
+    }
+
+    // --- ASCOLTO NOTIFICHE ADMIN ---
+    function listenToAdminNotifications() {
+      if (!currentUser) return;
+
+      const globalNotifRef = ref(db, 'notifications/global');
+      onChildAdded(globalNotifRef, (snapshot) => {
+        const notif = snapshot.val();
+        if (notif && notif.title) {
+          alert("📢 COMUNICAZIONE STAFF:\n\n" + notif.title + "\n" + (notif.message || ''));
+        }
+      });
+
+      if (currentUser.id) {
+        const directNotifRef = ref(db, 'notifications/direct/' + currentUser.id);
+        onChildAdded(directNotifRef, (snapshot) => {
+          const notif = snapshot.val();
+          if (notif && notif.title) {
+            alert("🔔 MESSAGGIO PRIVATO DALLO STAFF:\n\n" + notif.title + "\n" + (notif.message || ''));
+          }
+        });
+      }
     }
 
     const deleteModalEl = document.getElementById('deletePostModal');
@@ -458,13 +506,14 @@
         const data = snapshot.val();
         const myPosts = [];
         for (let key in data) {
-          if (data[key].author === currentUser.username) {
+          // Esclude post marcati come eliminati dall'admin
+          if (data[key].author === currentUser.username && data[key].deleted !== true) {
             myPosts.push({ id: key, ...data[key] });
           }
         }
 
         if (myPosts.length === 0) {
-          container.innerHTML = '<p class="text-center text-muted my-3">Non hai ancora pubblicato nessun post.</p>';
+          container.innerHTML = '<p class="text-center text-muted my-3">Non hai ancora pubblicato nessun post attivo.</p>';
           return;
         }
 
@@ -602,7 +651,6 @@
         confetti({ particleCount: unlockedSecret ? 120 : 50, spread: 70, origin: { y: 0.6 } });
         updateUI();
 
-        // Invia Notifica Nativa con Anteprima Foto
         if (unlockedSecret) {
           await sendNativeNotification("🏆 Badge Segreto Sbloccato!", `Hai sbloccato un badge speciale con ${catName}!`, imageUrl);
         } else {
@@ -675,4 +723,3 @@
 
 </body>
 </html>
-
