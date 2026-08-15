@@ -26,31 +26,6 @@
       color: #3d312a;
     }
 
-    #garden-container-box {
-      width: 100%;
-      max-width: 450px;
-      aspect-ratio: 9 / 16;
-      margin: 0 auto;
-      position: relative;
-      background-image: url('https://i.ibb.co/93HyWQJ1/1784837930021.jpg');
-      background-size: cover;
-      background-repeat: no-repeat;
-      background-position: center;
-      border: 8px solid #3d2314;
-      border-radius: 1.5rem;
-      overflow: hidden;
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.35);
-    }
-
-    #cats-canvas {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 2;
-    }
-
     .glass-card {
       background: rgba(255, 253, 250, 0.92);
       backdrop-filter: blur(14px);
@@ -66,67 +41,10 @@
       border-bottom: 1px solid rgba(210, 180, 140, 0.3);
     }
 
-    .avatar-circle {
-      width: 70px; height: 70px;
-      background: linear-gradient(45deg, #d97706, #b45309);
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 2.2rem;
-      border: 3px solid #fff;
-      color: white;
-    }
-
-    .cat-post-img {
-      width: 100%; height: 350px;
-      object-fit: cover;
-    }
-
     .page-section { display: none; }
     .page-section.active { display: block; animation: fadeIn 0.3s ease-in-out; }
 
-    .btn-like { color: #8c7a6b; transition: transform 0.2s; }
-    .btn-like.liked { color: #dc2626; transform: scale(1.1); }
-
     .auth-toggle-btn { cursor: pointer; color: #b45309; font-weight: bold; text-decoration: underline; }
-
-    .badge-card {
-      background: rgba(245, 238, 230, 0.8);
-      border-radius: 1rem;
-      padding: 8px 4px;
-      text-align: center;
-      border: 2px solid transparent;
-      transition: all 0.3s ease;
-      filter: grayscale(100%);
-      opacity: 0.35;
-    }
-
-    .badge-card.unlocked {
-      filter: grayscale(0%);
-      opacity: 1;
-      background: #fff;
-      border-color: #f59e0b;
-      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
-    }
-
-    .secret-badge-col { display: none; }
-
-    .secret-badge-col.unlocked {
-      display: block;
-      animation: popIn 0.4s ease-out;
-    }
-
-    .secret-badge-col.unlocked .badge-card {
-      filter: grayscale(0%);
-      opacity: 1;
-      background: #fffbeb;
-      border-color: #b45309;
-      box-shadow: 0 4px 12px rgba(180, 83, 9, 0.3);
-    }
-
-    .badge-icon {
-      font-size: 1.6rem;
-      margin-bottom: 2px;
-    }
 
     .btn-earth {
       background: linear-gradient(45deg, #88502f, #b45309);
@@ -142,11 +60,6 @@
       from { opacity: 0; transform: translateY(6px); }
       to { opacity: 1; transform: translateY(0); }
     }
-
-    @keyframes popIn {
-      0% { transform: scale(0.5); opacity: 0; }
-      100% { transform: scale(1); opacity: 1; }
-    }
   </style>
 </head>
 <body class="pb-5">
@@ -156,9 +69,6 @@
       <a class="navbar-brand fw-black fs-3 text-dark d-flex align-items-center gap-2" href="feed.html">
         <i class="fa-solid fa-cat" style="color: #b45309;"></i> MeowGo
       </a>
-      <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto gap-2 mt-2 mt-lg-0" id="nav-links"></ul>
       </div>
@@ -207,58 +117,14 @@
     </section>
   </div>
 
-  <!-- JS Bootstrap -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-  <!-- Registrazione Service Worker, Permessi Notifiche e Badge Icona -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', async () => {
-        try {
-          const reg = await navigator.serviceWorker.register('./sw.js');
-          console.log('Service Worker registrato:', reg.scope);
-
-          // Richiesta automatica permessi per le notifiche
-          if ('Notification' in window && Notification.permission === 'default') {
-            await Notification.requestPermission();
-          }
-        } catch (err) {
-          console.error('Errore registrazione Service Worker:', err);
-        }
-      });
-    }
-
-    // Helper globale per inviare notifiche (XP, Badge, Novità)
-    window.notifyUser = function(title, message, targetPage = './profile.html') {
-      if ('Notification' in window && Notification.permission === 'granted' && navigator.serviceWorker.controller) {
-        navigator.serviceWorker.ready.then((registration) => {
-          registration.showNotification(title, {
-            body: message,
-            icon: 'icons/icon-192.png',
-            badge: 'icons/icon-192.png',
-            vibrate: [200, 100, 200],
-            data: { url: targetPage }
-          });
-        });
-      }
-    };
-
-    // Helper globale per aggiornare il numero di Badge sull'icona della Home
-    window.setAppBadgeCount = function(count) {
-      if ('setAppBadge' in navigator) {
-        navigator.setAppBadge(count).catch((err) => console.error('Errore badge:', err));
-      }
-    };
-  </script>
 
   <!-- Firebase & Logica di Autenticazione -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import {
-      getDatabase, ref, push, get, child, update, onValue
-    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-
-    const IMGBB_API_KEY = "b2bd2cbba6ca0679055dc317aa5bf613";
+    import { getDatabase, ref, push, get, child, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    // Importiamo le funzioni del modulo notifiche centralizzato
+    import { sendWelcomeNotification, requestNotificationPermission } from "./notifications.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDAwgqotGF0BTUGBjxOMseMMfXpBZdAUTI",
@@ -279,45 +145,9 @@
     function setCurrentUser(user) {
       localStorage.setItem('meowgo_test_user', JSON.stringify(user));
     }
-    function clearCurrentUser() {
-      localStorage.removeItem('meowgo_test_user');
-    }
-
-    function renderNavbar(activePage, requireAuth = true) {
-      const currentUser = getCurrentUser();
-      const navLinks = document.getElementById('nav-links');
-
-      if (currentUser) {
-        navLinks.innerHTML = `
-          <li class="nav-item"><a class="nav-link fw-bold ${activePage === 'feed' ? 'text-warning' : 'text-dark'}" href="feed.html"><i class="fa-solid fa-newspaper"></i> Feed</a></li>
-          <li class="nav-item"><a class="nav-link fw-bold ${activePage === 'garden' ? 'text-warning' : 'text-success'}" href="garden.html"><i class="fa-solid fa-tree"></i> MeowGarden</a></li>
-          <li class="nav-item"><a class="nav-link fw-bold ${activePage === 'profile' ? 'text-warning' : 'text-dark'}" href="profile.html"><i class="fa-solid fa-user"></i> Profilo (${currentUser.username})</a></li>
-          <li class="nav-item"><a class="nav-link fw-bold text-danger" href="#" id="logout-link"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
-        `;
-        const logoutLink = document.getElementById('logout-link');
-        if (logoutLink) {
-          logoutLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            clearCurrentUser();
-            window.location.href = 'index.html';
-          });
-        }
-      } else {
-        navLinks.innerHTML = `
-          <li class="nav-item"><a class="nav-link fw-bold text-dark" href="index.html"><i class="fa-solid fa-right-to-bracket"></i> Accedi</a></li>
-        `;
-        if (requireAuth && activePage !== 'login') {
-          window.location.replace('index.html');
-        }
-      }
-
-      return currentUser;
-    }
 
     if (getCurrentUser()) {
       window.location.replace('feed.html');
-    } else {
-      renderNavbar('login', false);
     }
 
     let isRegisterMode = false;
@@ -356,6 +186,9 @@
       submitBtn.disabled = true;
 
       try {
+        // Richiedi i permessi delle notifiche durante il flusso di accesso/registrazione
+        await requestNotificationPermission();
+
         const dbRef = ref(db);
         const snapshot = await get(child(dbRef, 'users'));
         const usersData = snapshot.exists() ? snapshot.val() : {};
@@ -373,10 +206,8 @@
           await update(newUserRef, newUser);
           currentUser = { id: newUserRef.key, ...newUser };
 
-          // Notifica di benvenuto per la registrazione
-          if (window.notifyUser) {
-            window.notifyUser('Benvenuto su MeowGo! 🐾', 'Inizia subito a esplorare il MeowGarden!');
-          }
+          // Invia notifica di benvenuto (registrazione) gestita da notifications.js
+          await sendWelcomeNotification(currentUser.id);
 
         } else {
           let foundUser = null;
@@ -389,7 +220,6 @@
 
           if (!foundUser) throw new Error("Credenziali errate o utente non trovato.");
 
-          // CONTROLLO BAN AL LOGIN:
           if (foundUser.bannedUntil) {
             const isBanned = foundUser.bannedUntil === 'indefinite' || new Date(foundUser.bannedUntil) > new Date();
             if (isBanned) {
@@ -411,18 +241,7 @@
       }
     });
   </script>
-  <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', async () => {
-      try {
-        const reg = await navigator.serviceWorker.register('./firebase-messaging-sw.js', { scope: './' });
-        console.log('Service Worker registrato con successo:', reg);
-      } catch (err) {
-        console.error('Errore registrazione Service Worker:', err);
-      }
-    });
-  }
-</script>
-<script type="module" src="./notifications.js"></script>
+  <!-- Caricamento del modulo centrale delle notifiche -->
+  <script type="module" src="./notifications.js"></script>
 </body>
 </html>
