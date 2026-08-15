@@ -1,7 +1,7 @@
 {
   "name": "MeowGo Admin PWA",
   "short_name": "Admin",
-  "start_url": "./admin.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0c100d",
   "theme_color": "#00ff66",
