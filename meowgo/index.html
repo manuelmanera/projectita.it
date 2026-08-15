@@ -388,6 +388,15 @@
           }
 
           if (!foundUser) throw new Error("Credenziali errate o utente non trovato.");
+
+          // CONTROLLO BAN AL LOGIN:
+          if (foundUser.bannedUntil) {
+            const isBanned = foundUser.bannedUntil === 'indefinite' || new Date(foundUser.bannedUntil) > new Date();
+            if (isBanned) {
+              throw new Error(`⛔ Account Bloccato! Motivo: ${foundUser.banReason || 'Violazione delle regole'}`);
+            }
+          }
+
           currentUser = foundUser;
         }
 
