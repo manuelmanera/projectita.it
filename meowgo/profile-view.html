@@ -108,14 +108,14 @@
             </div>
           </div>
           <h3 class="fw-bold mb-1" id="profile-username">Caricamento...</h3>
-          <p class="text-muted small mb-3" id="profile-level-text">Livello - • - XP</p>
+          <p class="text-muted small mb-3" id="profile-level-text">Livello 1 • 0 XP</p>
 
-          <!-- Barra Progresso XP -->
+          <!-- Barra Progresso XP (1000 XP per livello) -->
           <div class="px-4 mb-4">
             <div class="progress" style="height: 10px; border-radius: 5px;">
               <div id="profile-xp-bar" class="progress-bar bg-warning" role="progressbar" style="width: 0%;"></div>
             </div>
-            <small class="text-muted mt-1 d-block" id="profile-xp-detail">0 / 100 XP</small>
+            <small class="text-muted mt-1 d-block" id="profile-xp-detail">0 / 1000 XP</small>
           </div>
 
           <div class="mt-3">
@@ -185,11 +185,20 @@
       document.getElementById('grid-owner-name').innerText = targetUsername;
       document.getElementById('modal-author').innerText = targetUsername;
 
+      // 1. Caricamento Dati Utente (XP, Livello, Badge, Avatar)
       const usersSnap = await get(ref(db, 'users'));
       if (usersSnap.exists()) {
         const users = usersSnap.val();
-        const userEntry = Object.values(users).find(u => u.username === targetUsername);
+        let userEntry = null;
         
+        // Cerca l'utente confrontando lo username (o la chiave se coincide)
+        for (const [uid, uData] of Object.entries(users)) {
+          if (uData.username === targetUsername || uid === targetUsername) {
+            userEntry = uData;
+            break;
+          }
+        }
+
         if (userEntry) {
           // Avatar
           if (userEntry.avatarUrl) {
@@ -198,15 +207,15 @@
             document.getElementById('profile-initial').innerText = targetUsername.charAt(0).toUpperCase();
           }
 
-          // XP e Livello
-          const xp = userEntry.xp || 0;
-          const level = Math.floor(xp / 100) + 1;
-          const xpInLevel = xp % 100;
+          // XP e Livello (1 livello ogni 1000 XP)
+          const xp = Number(userEntry.xp) || 0;
+          const level = Math.floor(xp / 1000) + 1;
+          const xpInLevel = xp % 1000;
+          const percent = (xpInLevel / 1000) * 100;
           
           document.getElementById('profile-level-text').innerText = `Livello ${level} • ${xp} XP totali`;
-          document.getElementById('profile-xp-bar.style').width = `${xpInLevel}%`;
-          document.getElementById('profile-xp-bar').style.width = `${xpInLevel}%`;
-          document.getElementById('profile-xp-detail').innerText = `${xpInLevel} / 100 XP al prossimo livello`;
+          document.getElementById('profile-xp-bar').style.width = `${percent}%`;
+          document.getElementById('profile-xp-detail').innerText = `${xpInLevel} / 1000 XP al prossimo livello`;
 
           // Badge / Achievements
           if (userEntry.badges) {
@@ -214,8 +223,9 @@
             badgesContainer.innerHTML = '';
             
             Object.entries(userEntry.badges).forEach(([badgeKey, badgeData]) => {
-              const title = badgeData.title || badgeKey;
-              const icon = badgeData.icon || 'fa-medal';
+              // Gestisce sia se è un booleano (es. badges: { cacciatore: true }) sia un oggetto strutturato
+              const title = (typeof badgeData === 'object' && badgeData.title) ? badgeData.title : badgeKey;
+              const icon = (typeof badgeData === 'object' && badgeData.icon) ? badgeData.icon : 'fa-medal';
               
               badgesContainer.innerHTML += `
                 <div class="badge-item" title="${title}">
@@ -230,7 +240,7 @@
         }
       }
 
-      // Caricamento Post
+      // 2. Caricamento Post (controllando sia 'author' che eventuali riferimenti utente)
       const postsSnap = await get(ref(db, 'cats'));
       const gridContainer = document.getElementById('user-posts-grid');
       gridContainer.innerHTML = '';
@@ -240,7 +250,8 @@
         const postsData = postsSnap.val();
         Object.keys(postsData).forEach(key => {
           const post = postsData[key];
-          if (!post.deleted && post.author === targetUsername) {
+          // Verifica se il post appartiene all'utente (tramite username o userId)
+          if (!post.deleted && (post.author === targetUsername || post.username === targetUsername)) {
             userPosts.push({ id: key, ...post });
           }
         });
@@ -248,7 +259,7 @@
         if (userPosts.length > 0) {
           userPosts.forEach((post, index) => {
             const thumb = document.createElement('img');
-            thumb.src = post.imageUrl;
+            thumb.src = post.imageUrl || post.image;
             thumb.className = 'grid-thumbnail';
             thumb.addEventListener('click', () => openIgModal(index));
             gridContainer.appendChild(thumb);
@@ -267,9 +278,9 @@
 
     function updateModalContent() {
       const post = userPosts[currentPostIndex];
-      document.getElementById('modal-img').src = post.imageUrl;
-      document.getElementById('modal-cat-name').innerText = post.catName || 'Senza nome';
-      document.getElementById('modal-date').innerText = post.date || '';
+      document.getElementById('modal-img').src = post.imageUrl || post.image;
+      document.getElementById('modal-cat-name').innerText = post.catName || post.title || 'Senza nome';
+      document.getElementById('modal-date').innerText = post.date || post.createdAt || '';
     }
 
     document.getElementById('ig-prev-btn').addEventListener('click', () => {
