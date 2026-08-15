@@ -16,11 +16,16 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       background: linear-gradient(135deg, #f5f0eb 0%, #e6d5c3 50%, #d4a373 100%);
       min-height: 100vh;
       font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
       color: #3d312a;
+      overflow-x: hidden;
     }
 
     .glass-card {
@@ -32,7 +37,7 @@
       box-shadow: 0 10px 30px rgba(80, 50, 20, 0.1);
     }
 
-    /* Navbar Sticky per Mobile e Desktop */
+    /* Navbar Sticky */
     .navbar-glass {
       background: rgba(255, 253, 250, 0.95);
       backdrop-filter: blur(10px);
@@ -59,33 +64,42 @@
       color: white;
     }
 
-    /* Griglia Calendario */
+    /* --- GRIGLIA CALENDARIO OTTIMIZZATA PER MOBILE --- */
+    .calendar-container {
+      width: 100%;
+      overflow: hidden;
+    }
+
     .calendar-grid {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
-      gap: 6px;
+      gap: 4px;
+      width: 100%;
     }
 
     .calendar-day-header {
       text-align: center;
       font-weight: bold;
-      font-size: 0.85rem;
+      font-size: 0.75rem;
       color: #8c7a6b;
-      padding: 6px 0;
+      padding: 4px 0;
     }
 
     .calendar-day-cell {
-      aspect-ratio: 1;
-      border-radius: 0.75rem;
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      border-radius: 0.6rem;
       background: rgba(255, 255, 255, 0.6);
       border: 1px solid rgba(210, 180, 140, 0.3);
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: space-between;
-      padding: 4px;
+      justify-content: center;
+      padding: 2px;
       font-size: 0.8rem;
       cursor: pointer;
+      user-select: none;
       transition: all 0.2s ease;
     }
 
@@ -110,16 +124,48 @@
       border-color: #f59e0b;
     }
 
+    /* Badge posizionato in assoluto senza deformare la cella */
     .event-badge {
+      position: absolute;
+      bottom: 2px;
       background: #b45309;
       color: white;
       border-radius: 50%;
-      width: 18px;
-      height: 18px;
-      font-size: 0.65rem;
+      width: 15px;
+      height: 15px;
+      font-size: 0.6rem;
+      font-weight: bold;
       display: flex;
       align-items: center;
       justify-content: center;
+      line-height: 1;
+    }
+
+    .calendar-day-cell span.day-number {
+      margin-bottom: 8px;
+    }
+
+    /* Su schermi molto stretti compattiamo il padding del contenitore */
+    @media (max-width: 400px) {
+      .glass-card-calendar {
+        padding: 1rem !important;
+      }
+      .calendar-grid {
+        gap: 2px;
+      }
+      .calendar-day-cell {
+        font-size: 0.75rem;
+        border-radius: 0.4rem;
+      }
+      .event-badge {
+        width: 13px;
+        height: 13px;
+        font-size: 0.55rem;
+        bottom: 1px;
+      }
+      .calendar-day-cell span.day-number {
+        margin-bottom: 6px;
+      }
     }
   </style>
 </head>
@@ -143,22 +189,24 @@
     </div>
   </nav>
 
-  <div class="container">
+  <div class="container px-2 px-sm-3">
     <div class="row justify-content-center">
       <div class="col-lg-8">
         
-        <div class="glass-card p-4 mb-4">
-          <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="glass-card glass-card-calendar p-3 p-sm-4 mb-4 calendar-container">
+          <!-- Controlli Mese/Anno -->
+          <div class="d-flex justify-content-between align-items-center mb-3">
             <button class="btn btn-earth btn-sm rounded-circle px-3" id="prev-month">
               <i class="fa-solid fa-chevron-left"></i>
             </button>
-            <h4 class="fw-bold mb-0 text-dark" id="current-month-display">---</h4>
+            <h5 class="fw-bold mb-0 text-dark" id="current-month-display">---</h5>
             <button class="btn btn-earth btn-sm rounded-circle px-3" id="next-month">
               <i class="fa-solid fa-chevron-right"></i>
             </button>
           </div>
 
-          <div class="calendar-grid mb-2">
+          <!-- Header Giorni della Settimana -->
+          <div class="calendar-grid mb-1">
             <div class="calendar-day-header">Lun</div>
             <div class="calendar-day-header">Mar</div>
             <div class="calendar-day-header">Mer</div>
@@ -168,14 +216,16 @@
             <div class="calendar-day-header">Dom</div>
           </div>
 
+          <!-- Griglia Giorni del Mese -->
           <div class="calendar-grid" id="calendar-days-grid"></div>
         </div>
 
-        <div class="glass-card p-4">
-          <h5 class="fw-bold mb-3 text-dark" id="selected-date-title">
+        <!-- Sezione Dettaglio Avvistamenti -->
+        <div class="glass-card p-3 p-sm-4">
+          <h5 class="fw-bold mb-3 text-dark fs-6 fs-sm-5" id="selected-date-title">
             <i class="fa-solid fa-calendar-day me-2" style="color: #b45309;"></i>Seleziona un giorno
           </h5>
-          <div id="day-events-container" class="d-flex flex-column gap-3">
+          <div id="day-events-container" class="d-flex flex-column gap-2">
             <p class="text-muted small mb-0">Clicca su una data nel calendario per visualizzare gli avvistamenti associati.</p>
           </div>
         </div>
@@ -293,11 +343,11 @@
           return false;
         });
 
-        cell.innerHTML = `<span>${day}</span>`;
-
         if (eventsOnDay.length > 0) {
           cell.classList.add('has-events');
-          cell.innerHTML += `<span class="event-badge">${eventsOnDay.length}</span>`;
+          cell.innerHTML = `<span class="day-number">${day}</span><span class="event-badge">${eventsOnDay.length}</span>`;
+        } else {
+          cell.innerHTML = `<span>${day}</span>`;
         }
 
         cell.addEventListener('click', () => showDayEvents(dateStr, eventsOnDay));
@@ -321,10 +371,10 @@
         const div = document.createElement('div');
         div.className = "d-flex align-items-center gap-3 p-2 rounded bg-white border";
         div.innerHTML = `
-          <img src="${post.imageUrl}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;" alt="${post.catName}">
-          <div>
-            <h6 class="fw-bold mb-0 text-dark">${post.catName}</h6>
-            <small class="text-muted"><i class="fa-solid fa-user me-1"></i>${post.author} - ${post.time || ''}</small>
+          <img src="${post.imageUrl}" style="width: 48px; height: 48px; object-fit: cover; border-radius: 8px;" alt="${post.catName}">
+          <div class="overflow-hidden">
+            <h6 class="fw-bold mb-0 text-dark text-truncate">${post.catName}</h6>
+            <small class="text-muted d-block text-truncate"><i class="fa-solid fa-user me-1"></i>${post.author} - ${post.time || ''}</small>
           </div>
         `;
         container.appendChild(div);
@@ -342,7 +392,7 @@
     });
   </script>
 
-  <!-- Script Mobile-Optimized per nascondere/mostrare la Navbar -->
+  <!-- Script Mobile-Optimized Navbar -->
   <script>
     let lastScrollTop = 0;
     const navbar = document.querySelector('.navbar');
