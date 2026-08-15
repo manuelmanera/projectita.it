@@ -166,18 +166,18 @@
 
     <!-- TABS -->
     <ul class="nav nav-tabs mb-4" id="adminTabs" role="tablist">
-      <li class="nav-item">
-        <button class="nav-link active" id="users-tab" data-bs-toggle="tab" data-bs-target="#users-panel" type="button">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="users-tab" data-bs-toggle="tab" data-bs-target="#users-panel" type="button" role="tab">
           <i class="fa-solid fa-users me-1"></i> Utenti
         </button>
       </li>
-      <li class="nav-item">
-        <button class="nav-link" id="posts-tab" data-bs-toggle="tab" data-bs-target="#posts-panel" type="button">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="posts-tab" data-bs-toggle="tab" data-bs-target="#posts-panel" type="button" role="tab">
           <i class="fa-solid fa-file-contract me-1"></i> Moderazione Post
         </button>
       </li>
-      <li class="nav-item">
-        <button class="nav-link" id="notify-tab" data-bs-toggle="tab" data-bs-target="#notify-panel" type="button">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="notify-tab" data-bs-toggle="tab" data-bs-target="#notify-panel" type="button" role="tab">
           <i class="fa-solid fa-paper-plane me-1"></i> Invio Notifiche
         </button>
       </li>
@@ -197,7 +197,7 @@
       <div class="tab-pane fade" id="posts-panel" role="tabpanel">
         <div class="hacker-card p-3 mb-4">
           <h5 class="fw-bold mb-2 text-success"><i class="fa-solid fa-triangle-exclamation me-2"></i>Moderazione Post</h5>
-          <p class="small text-muted mb-3">> I post eliminati restano sospesi per 7 giorni per eventuale ricorso.</p>
+          <p class="small text-muted mb-3">&gt; I post eliminati restano sospesi per 7 giorni per eventuale ricorso.</p>
           <div id="posts-list" class="row g-3"></div>
         </div>
       </div>
@@ -208,22 +208,22 @@
           <h5 class="fw-bold mb-3 text-success"><i class="fa-solid fa-bullhorn me-2"></i>Invio Notifiche</h5>
           
           <div class="mb-3">
-            <label class="form-label fw-bold">Cerca Utente per Notifica Mirata:</label>
+            <label for="notify-user-search" class="form-label fw-bold">Cerca Utente per Notifica Mirata:</label>
             <input type="text" id="notify-user-search" class="form-control mb-2" placeholder="Filtra utenti per nome o ID...">
             
-            <label class="form-label fw-bold">Destinatario:</label>
+            <label for="notify-target" class="form-label fw-bold">Destinatario:</label>
             <select id="notify-target" class="form-select">
               <option value="ALL">📢 TUTTI GLI UTENTI (Broadcast Global)</option>
             </select>
           </div>
 
           <div class="mb-3">
-            <label class="form-label fw-bold">Titolo Notifica:</label>
+            <label for="notify-title" class="form-label fw-bold">Titolo Notifica:</label>
             <input type="text" id="notify-title" class="form-control" placeholder="Es. Avviso di Moderazione">
           </div>
 
           <div class="mb-3">
-            <label class="form-label fw-bold">Messaggio:</label>
+            <label for="notify-message" class="form-label fw-bold">Messaggio:</label>
             <textarea id="notify-message" class="form-control" rows="4" placeholder="Scrivi il messaggio..."></textarea>
           </div>
 
@@ -243,13 +243,13 @@
       <div class="modal-content hacker-card">
         <div class="modal-header border-bottom border-secondary">
           <h5 class="modal-title fw-bold text-danger"><i class="fa-solid fa-ban me-2"></i> Blocco Utente</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
           <p id="ban-user-name" class="fw-bold text-success mb-3"></p>
           
           <div class="mb-3">
-            <label class="form-label fw-bold">Durata Blocco:</label>
+            <label for="ban-duration" class="form-label fw-bold">Durata Blocco:</label>
             <select id="ban-duration" class="form-select">
               <option value="24h">24 Ore</option>
               <option value="3d">3 Giorni</option>
@@ -260,7 +260,7 @@
           </div>
 
           <div class="mb-3">
-            <label class="form-label fw-bold">Motivazione:</label>
+            <label for="ban-reason" class="form-label fw-bold">Motivazione:</label>
             <textarea id="ban-reason" class="form-control" rows="2" placeholder="Motivo della sospensione..."></textarea>
           </div>
         </div>
@@ -276,9 +276,8 @@
   
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, onValue, update, push, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getDatabase, ref, onValue, update, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-    // Firebase Config (Regole Mode Test)
     const firebaseConfig = {
       apiKey: "AIzaSyDAwgqotGF0BTUGBjxOMseMMfXpBZdAUTI",
       authDomain: "meowmaster-51991.firebaseapp.com",
@@ -301,12 +300,10 @@
       banModalInstance = new bootstrap.Modal(document.getElementById('banModal'));
     });
 
-    // Registrazione Service Worker per la PWA
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Registration error:', err));
     }
 
-    // Caricamento Utenti in tempo reale
     const usersRef = ref(db, 'users');
     onValue(usersRef, (snapshot) => {
       usersData = snapshot.exists() ? snapshot.val() : {};
@@ -314,7 +311,6 @@
       updateNotificationTargetList();
     }, (err) => alert("Errore lettura utenti: " + err.message));
 
-    // Caricamento Post in tempo reale
     const postsRef = ref(db, 'cats');
     onValue(postsRef, (snapshot) => {
       postsData = [];
@@ -325,7 +321,6 @@
       renderPosts();
     }, (err) => alert("Errore lettura post: " + err.message));
 
-    // Renderizza la lista utenti
     function renderUsers(filterQuery = '') {
       const container = document.getElementById('users-list');
       container.innerHTML = '';
@@ -367,7 +362,7 @@
                   <i class="fa-solid fa-lock-open me-1"></i> SBLOCCA
                 </button>
               ` : `
-                <button class="btn btn-hacker-danger btn-sm w-100" onclick="openBanModal('${uid}', '${username}')">
+                <button class="btn btn-hacker-danger btn-sm w-100" onclick="openBanModal('${uid}', '${username.replace(/'/g, "\\'")}')">
                   <i class="fa-solid fa-ban me-1"></i> BLOCCA
                 </button>
               `}
@@ -378,7 +373,6 @@
       });
     }
 
-    // Renderizza la lista dei post
     function renderPosts(filterQuery = '') {
       const container = document.getElementById('posts-list');
       container.innerHTML = '';
@@ -451,7 +445,6 @@
       });
     }
 
-    // Modalità Ban Utente
     window.openBanModal = (uid, username) => {
       selectedUserIdForBan = uid;
       document.getElementById('ban-user-name').innerText = `Utente: ${username} (${uid})`;
@@ -501,7 +494,6 @@
       }
     };
 
-    // Gestione Moderazione Post
     window.deletePost = async (postId) => {
       if (confirm(`Eliminare il post? L'utente avrà 7 giorni per inviare ricorso.`)) {
         try {
@@ -530,7 +522,6 @@
       }
     };
 
-    // Ricerca e Selezione Destinatari Notifiche
     function updateNotificationTargetList(filter = '') {
       const select = document.getElementById('notify-target');
       select.innerHTML = '<option value="ALL">📢 TUTTI GLI UTENTI (Broadcast Global)</option>';
@@ -554,7 +545,6 @@
       updateNotificationTargetList(e.target.value.toLowerCase().trim());
     });
 
-    // SISTEMATO: Invio Notifiche In-App & Innesco FCM
     document.getElementById('btn-send-notification').addEventListener('click', async () => {
       const target = document.getElementById('notify-target').value;
       const title = document.getElementById('notify-title').value.trim();
@@ -576,25 +566,19 @@
 
       try {
         if (target === 'ALL') {
-          // 1. Scrivi lo storico globale
           await push(ref(db, 'notifications/global'), notificationPayload);
-          
-          // 2. Se salvato nei profili utente, crea una coda per invio FCM
           await push(ref(db, 'fcm_queue'), {
             ...notificationPayload,
             type: 'broadcast'
           });
         } else {
-          // 1. Scrivi la notifica diretta per l'utente specifico
           await push(ref(db, `notifications/direct/${target}`), notificationPayload);
           
-          // 2. Aggiungi il token se disponibile nel profilo utente
           const userObj = usersData[target];
           if (userObj && userObj.fcmToken) {
             notificationPayload.fcmToken = userObj.fcmToken;
           }
 
-          // 3. Coda di invio
           await push(ref(db, 'fcm_queue'), {
             ...notificationPayload,
             type: 'direct'
@@ -609,7 +593,6 @@
       }
     });
 
-    // Filtro Ricerca Globale
     document.getElementById('global-search').addEventListener('input', (e) => {
       const q = e.target.value.toLowerCase().trim();
       renderUsers(q);
