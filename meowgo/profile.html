@@ -322,6 +322,19 @@
     const db = getDatabase(app);
     let messaging = null;
 
+    // Funzione preliminare per recuperare l'utente corrente
+    function getCurrentUser() {
+      return JSON.parse(localStorage.getItem('meowgo_test_user')) || null;
+    }
+    function setCurrentUser(user) {
+      localStorage.setItem('meowgo_test_user', JSON.stringify(user));
+    }
+    function clearCurrentUser() {
+      localStorage.removeItem('meowgo_test_user');
+    }
+
+    const currentUser = getCurrentUser();
+
     // Inizializza notifiche native Firebase FCM
     try {
       messaging = getMessaging(app);
@@ -346,11 +359,12 @@
       });
     }
 
+    // Funzione centralizzata per mostrare la notifica nativa con titolo e corpo dinamici
     async function sendNativeNotification(title, body, imageUrl = null) {
       if (!('Notification' in window) || Notification.permission !== 'granted') return;
 
       const options = {
-        body: body,
+        body: body || "",
         icon: './icons/icon-512.png',
         badge: './icons/icon-512.png',
         image: imageUrl || null,
@@ -365,34 +379,24 @@
       try {
         const reg = await navigator.serviceWorker.ready;
         if (reg && reg.showNotification) {
-          await reg.showNotification(title, options);
+          await reg.showNotification(title || "MeowGo", options);
         } else {
-          new Notification(title, options);
+          new Notification(title || "MeowGo", options);
         }
       } catch (err) {
         console.warn("Errore notifica nativa:", err);
       }
     }
 
-    function getCurrentUser() {
-      return JSON.parse(localStorage.getItem('meowgo_test_user')) || null;
-    }
-    function setCurrentUser(user) {
-      localStorage.setItem('meowgo_test_user', JSON.stringify(user));
-    }
-    function clearCurrentUser() {
-      localStorage.removeItem('meowgo_test_user');
-    }
-
     function renderNavbar(activePage, requireAuth = true) {
-      const currentUser = getCurrentUser();
+      const activeUser = getCurrentUser();
       const navLinks = document.getElementById('nav-links');
 
-      if (currentUser) {
+      if (activeUser) {
         navLinks.innerHTML = `
           <li class="nav-item"><a class="nav-link fw-bold ${activePage === 'feed' ? 'text-warning' : 'text-dark'}" href="feed.html"><i class="fa-solid fa-newspaper"></i> Feed</a></li>
           <li class="nav-item"><a class="nav-link fw-bold ${activePage === 'garden' ? 'text-warning' : 'text-success'}" href="garden.html"><i class="fa-solid fa-tree"></i> MeowGarden</a></li>
-          <li class="nav-item"><a class="nav-link fw-bold ${activePage === 'profile' ? 'text-warning' : 'text-dark'}" href="profile.html"><i class="fa-solid fa-user"></i> Profilo (${currentUser.username})</a></li>
+          <li class="nav-item"><a class="nav-link fw-bold ${activePage === 'profile' ? 'text-warning' : 'text-dark'}" href="profile.html"><i class="fa-solid fa-user"></i> Profilo (${activeUser.username})</a></li>
           <li class="nav-item"><a class="nav-link fw-bold text-danger" href="#" id="logout-link"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
         `;
         const logoutLink = document.getElementById('logout-link');
@@ -412,10 +416,10 @@
         }
       }
 
-      return currentUser;
+      return activeUser;
     }
 
-    const currentUser = renderNavbar('profile');
+    renderNavbar('profile');
 
     if (currentUser) {
       document.getElementById('user-display-name').innerText = currentUser.username;
@@ -450,7 +454,7 @@
       });
     }
 
-    // --- ASCOLTO NOTIFICHE ADMIN (TRAMITE CENTRO NOTIFICHE NATIVO DELL'APP) ---
+    // --- ASCOLTO NOTIFICHE ADMIN CON TITOLO E TESTO DINAMICI DAL DB ---
     function listenToAdminNotifications() {
       if (!currentUser) return;
 
@@ -461,8 +465,9 @@
         const notifId = snapshot.key;
         const lastSeenGlobal = localStorage.getItem('meowgo_last_seen_global') || '';
 
-        if (notif && notif.title && notifId !== lastSeenGlobal) {
-          sendNativeNotification("🔔 MESSAGGIO DALLO STAFF", notif.title + (notif.message ? "\n" + notif.message : ""));
+        if (notif && notifId !== lastSeenGlobal) {
+          // Legge direttamente il titolo e il messaggio salvati dal pannello Admin
+          sendNativeNotification(notif.title || "MeowGo", notif.message || "");
           localStorage.setItem('meowgo_last_seen_global', notifId);
         }
       });
@@ -474,8 +479,9 @@
           const notif = snapshot.val();
           const notifId = snapshot.key;
           
-          if (notif && notif.title && notif.read !== true) {
-            sendNativeNotification("🔔 MESSAGGIO DALLO STAFF", notif.title + (notif.message ? "\n" + notif.message : ""));
+          if (notif && notif.read !== true) {
+            // Legge direttamente il titolo e il messaggio salvati dal pannello Admin
+            sendNativeNotification(notif.title || "MeowGo", notif.message || "");
             
             // Segna come letta sul DB
             update(ref(db, `notifications/direct/${currentUser.id}/${notifId}`), {
@@ -713,23 +719,13 @@
       });
 
       const secretSection = document.getElementById('secret-badges-section');
-      if (countUnlockedSecrets > 0) {
-        secretSection.classList.remove('d-none');
-      } else {
-        secretSection.classList.add('d-none');
-      }
-    }
-  </script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', async () => {
-        try {
-          const reg = await navigator.serviceWorker.register('./firebase-messaging-sw.js', { scope: './' });
-          console.log('Service Worker registrato con successo:', reg);
-        } catch (err) {
-          console.log('Registrazione Service Worker fallita:', err);
+      if (secretSection) {
+        if (countUnlockedSecrets > 0) {
+          secretSection.classList.remove('d-none');
+        } else {
+          secretSection.classList.add('d-none');
         }
-      });
+      }
     }
   </script>
 </body>
