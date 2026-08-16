@@ -86,8 +86,6 @@
     .btn-like { color: #8c7a6b; transition: transform 0.2s; }
     .btn-like.liked { color: #dc2626; transform: scale(1.1); }
 
-    .auth-toggle-btn { cursor: pointer; color: #b45309; font-weight: bold; text-decoration: underline; }
-
     .badge-card {
       background: rgba(245, 238, 230, 0.8);
       border-radius: 1rem;
@@ -342,7 +340,9 @@
 
     if (messaging) {
       onMessage(messaging, (payload) => {
-        sendNativeNotification(payload.notification.title, payload.notification.body, payload.notification.image);
+        if (payload.notification) {
+          sendNativeNotification(payload.notification.title || "MeowGo", payload.notification.body || "", payload.notification.image);
+        }
       });
     }
 
@@ -450,7 +450,7 @@
       });
     }
 
-    // --- ASCOLTO NOTIFICHE ADMIN (ORA INVIATE AL CENTRO NOTIFICHE NATIVO DEL TELEFONO) ---
+    // --- ASCOLTO NOTIFICHE ADMIN (TRAMITE CENTRO NOTIFICHE NATIVO DELL'APP) ---
     function listenToAdminNotifications() {
       if (!currentUser) return;
 
@@ -462,8 +462,7 @@
         const lastSeenGlobal = localStorage.getItem('meowgo_last_seen_global') || '';
 
         if (notif && notif.title && notifId !== lastSeenGlobal) {
-          // Invia direttamente alla barra delle notifiche nativa del dispositivo invece di usare l'alert del browser
-          sendNativeNotification("📢 COMUNICAZIONE STAFF", notif.title + (notif.message ? "\n" + notif.message : ""));
+          sendNativeNotification("🔔 MESSAGGIO DALLO STAFF", notif.title + (notif.message ? "\n" + notif.message : ""));
           localStorage.setItem('meowgo_last_seen_global', notifId);
         }
       });
@@ -476,7 +475,6 @@
           const notifId = snapshot.key;
           
           if (notif && notif.title && notif.read !== true) {
-            // Invia direttamente alla barra delle notifiche nativa del dispositivo
             sendNativeNotification("🔔 MESSAGGIO DALLO STAFF", notif.title + (notif.message ? "\n" + notif.message : ""));
             
             // Segna come letta sul DB
