@@ -450,11 +450,11 @@
       });
     }
 
-    // --- ASCOLTO NOTIFICHE ADMIN (AGGIORNATO PER EVITARE LOOP) ---
+    // --- ASCOLTO NOTIFICHE ADMIN (ORA INVIATE AL CENTRO NOTIFICHE NATIVO DEL TELEFONO) ---
     function listenToAdminNotifications() {
       if (!currentUser) return;
 
-      // Gestione notifiche globali (usiamo localStorage per ricordarci quelle già viste)
+      // Gestione notifiche globali
       const globalNotifRef = ref(db, 'notifications/global');
       onChildAdded(globalNotifRef, (snapshot) => {
         const notif = snapshot.val();
@@ -462,12 +462,13 @@
         const lastSeenGlobal = localStorage.getItem('meowgo_last_seen_global') || '';
 
         if (notif && notif.title && notifId !== lastSeenGlobal) {
-          alert("📢 COMUNICAZIONE STAFF:\n\n" + notif.title + "\n" + (notif.message || ''));
+          // Invia direttamente alla barra delle notifiche nativa del dispositivo invece di usare l'alert del browser
+          sendNativeNotification("📢 COMUNICAZIONE STAFF", notif.title + (notif.message ? "\n" + notif.message : ""));
           localStorage.setItem('meowgo_last_seen_global', notifId);
         }
       });
 
-      // Gestione notifiche dirette (utente specifico con flag read: true)
+      // Gestione notifiche dirette (utente specifico)
       if (currentUser.id) {
         const directNotifRef = ref(db, 'notifications/direct/' + currentUser.id);
         onChildAdded(directNotifRef, (snapshot) => {
@@ -475,9 +476,10 @@
           const notifId = snapshot.key;
           
           if (notif && notif.title && notif.read !== true) {
-            alert("🔔 MESSAGGIO PRIVATO DALLO STAFF:\n\n" + notif.title + "\n" + (notif.message || ''));
+            // Invia direttamente alla barra delle notifiche nativa del dispositivo
+            sendNativeNotification("🔔 MESSAGGIO DALLO STAFF", notif.title + (notif.message ? "\n" + notif.message : ""));
             
-            // Segna la notifica come letta nel database in modo che non compaia più
+            // Segna come letta sul DB
             update(ref(db, `notifications/direct/${currentUser.id}/${notifId}`), {
               read: true
             }).catch(err => console.error("Errore aggiornamento stato notifica:", err));
