@@ -61,7 +61,7 @@ self.addEventListener('push', (event) => {
     badge: './icons/icon-192.png',
     vibrate: [100, 50, 100],
     data: {
-      url: data.url || data.data?.url || './garden.html'
+      url: data.url || data.data?.url || './feed.html'
     }
   };
 
@@ -76,7 +76,7 @@ self.addEventListener('push', (event) => {
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
-  const targetUrl = event.notification.data?.url || './garden.html';
+  const targetUrl = event.notification.data?.url || './feed.html';
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
