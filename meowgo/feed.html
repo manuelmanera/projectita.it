@@ -76,6 +76,20 @@
       transform: scale(1.08);
       box-shadow: 0 4px 12px rgba(180, 83, 9, 0.3);
     }
+
+    /* Stile per i Banner Notifiche nel Feed */
+    .notification-banner {
+      background: linear-gradient(135deg, #fff3cd, #ffe8a1);
+      border: 1px solid #ffeeba;
+      color: #856404;
+      border-radius: 1rem;
+      box-shadow: 0 4px 15px rgba(133, 100, 4, 0.1);
+      animation: fadeIn 0.4s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
   </style>
 </head>
 <body class="pb-5">
@@ -122,6 +136,9 @@
             </div>
           </div>
 
+          <!-- CONTAINER NOTIFICHE IN TEMPO REALE NEL FEED -->
+          <div id="feed-notifications-container" class="d-flex flex-column gap-3 mb-4"></div>
+
           <div id="feed-container" class="d-flex flex-column gap-4"></div>
         </div>
       </div>
@@ -132,7 +149,7 @@
   
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, get, update, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getDatabase, ref, get, update, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDAwgqotGF0BTUGBjxOMseMMfXpBZdAUTI",
@@ -179,6 +196,7 @@
     const currentUser = renderNavbar('feed');
     if (currentUser) {
       listenToFeed();
+      listenToNotifications();
     }
 
     function formatPostTimestamp(post) {
@@ -190,6 +208,98 @@
       }
       return post.time || '';
     }
+
+    // --- ASCOLTO NOTIFICHE E MOSTRALI NEL FEED ---
+    function listenToNotifications() {
+      const notifContainer = document.getElementById('feed-notifications-container');
+
+      // 1. Ascolta Notifiche Globali / Broadcast
+      const globalRef = ref(db, 'notifications/global');
+      onValue(globalRef, (snapshot) => {
+        renderCombinedNotifications();
+      });
+
+      // 2. Ascolta Notifiche Dirette per l'utente loggato
+      if (currentUser && currentUser.id) {
+        const directRef = ref(db, `notifications/direct/${currentUser.id}`);
+        onValue(directRef, (snapshot) => {
+          renderCombinedNotifications();
+        });
+      }
+    }
+
+    async function renderCombinedNotifications() {
+      const notifContainer = document.getElementById('feed-notifications-container');
+      notifContainer.innerHTML = '';
+
+      let activeNotifs = [];
+
+      try {
+        // Prendi globali
+        const globalSnap = await get(ref(db, 'notifications/global'));
+        if (globalSnap.exists()) {
+          const val = globalSnap.val();
+          for (let id in val) {
+            activeNotifs.push({ id, type: 'global', ...val[id] });
+          }
+        }
+
+        // Prendi dirette
+        if (currentUser && currentUser.id) {
+          const directSnap = await get(ref(db, `notifications/direct/${currentUser.id}`));
+          if (directSnap.exists()) {
+            const val = directSnap.val();
+            for (let id in val) {
+              // Mostriamo solo quelle non lette o tutte quelle recenti
+              activeNotifs.push({ id, type: 'direct', ...val[id] });
+            }
+          }
+        }
+
+        // Ordina per data (più recenti in alto)
+        activeNotifs.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+        if (activeNotifs.length > 0) {
+          activeNotifs.forEach(n => {
+            const banner = document.createElement('div');
+            banner.className = "p-3 notification-banner d-flex align-items-start justify-content-between gap-3";
+            banner.innerHTML = `
+              <div class="d-flex align-items-start gap-3">
+                <i class="fa-solid fa-bell fs-4 text-warning mt-1"></i>
+                <div>
+                  <h6 class="fw-bold mb-1">${n.title || 'Avviso dallo Staff'}</h6>
+                  <p class="mb-0 small">${n.message || n.body || ''}</p>
+                </div>
+              </div>
+              <button class="btn btn-sm btn-outline-dark border-0" onclick="dismissNotification('${n.id}', '${n.type}')" title="Chiudi notifica">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            `;
+            notifContainer.appendChild(banner);
+          });
+        }
+      } catch (err) {
+        console.error("Errore caricamento notifiche feed:", err);
+      }
+    }
+
+    // Funzione globale per rimuovere / segnare come letta la notifica dal feed
+    window.dismissNotification = async function(notifId, type) {
+      try {
+        if (type === 'direct' && currentUser && currentUser.id) {
+          // Rimuove la notifica diretta dal db dell'utente così sparisce
+          await remove(ref(db, `notifications/direct/${currentUser.id}/${notifId}`));
+        } else {
+          // Per le globali, salviamo in localStorage quelle nascoste dall'utente corrente
+          let dismissed = JSON.parse(localStorage.getItem('dismissed_globals') || '[]');
+          dismissed.push(notifId);
+          localStorage.setItem('dismissed_globals', JSON.stringify(dismissed));
+          renderCombinedNotifications();
+        }
+      } catch (err) {
+        console.error("Errore chiusura notifica:", err);
+      }
+    };
 
     function listenToFeed() {
       const catsRef = ref(db, 'cats');
