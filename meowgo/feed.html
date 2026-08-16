@@ -133,7 +133,7 @@
   
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, get, update, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getDatabase, ref, get, update, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDAwgqotGF0BTUGBjxOMseMMfXpBZdAUTI",
@@ -180,10 +180,63 @@
     const currentUser = renderNavbar('feed');
     if (currentUser) {
       listenToFeed();
+      setupNotificationsListener(currentUser);
+
       // Registrazione del Service Worker per abilitare le notifiche di sistema
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('sw.js').then(reg => {
           console.log('Service Worker attivo per le notifiche di sistema.');
+        });
+      }
+    }
+
+    // --- GESTIONE NOTIFICHE DI SISTEMA SUL FEED ---
+    function setupNotificationsListener(user) {
+      // 1. Ascolto in tempo reale notifiche globali
+      const globalRef = ref(db, 'notifications/global');
+      onValue(globalRef, (snapshot) => {
+        if (snapshot.exists()) {
+          const globals = snapshot.val();
+          let dismissed = JSON.parse(localStorage.getItem('dismissed_globals') || '[]');
+
+          for (let id in globals) {
+            if (!dismissed.includes(id)) {
+              showSystemNotification(globals[id].title || 'MeowGo', globals[id].message || globals[id].body || 'Nuova notifica');
+              // Segna come vista salvandola in localStorage per non ripeterla all'infinito
+              dismissed.push(id);
+              localStorage.setItem('dismissed_globals', JSON.stringify(dismissed));
+            }
+          }
+        }
+      });
+
+      // 2. Ascolto in tempo reale notifiche dirette all'utente
+      if (user && user.id) {
+        const directRef = ref(db, `notifications/direct/${user.id}`);
+        onValue(directRef, async (snapshot) => {
+          if (snapshot.exists()) {
+            const directs = snapshot.val();
+            for (let id in directs) {
+              const n = directs[id];
+              showSystemNotification(n.title || 'MeowGo', n.message || n.body || 'Hai un nuovo messaggio');
+              // Rimuovi la notifica dal database dopo averla mostrata
+              await remove(ref(db, `notifications/direct/${user.id}/${id}`));
+            }
+          }
+        });
+      }
+    }
+
+    function showSystemNotification(title, body) {
+      if ('Notification' in window && Notification.permission === 'granted') {
+        // Mostra la notifica direttamente nella barra del sistema operativo
+        navigator.serviceWorker.ready.then((registration) => {
+          registration.showNotification(title, {
+            body: body,
+            icon: './icons/icon-192.png',
+            badge: './icons/icon-192.png',
+            vibrate: [100, 50, 100]
+          });
         });
       }
     }
