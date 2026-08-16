@@ -40,26 +40,25 @@ self.addEventListener('fetch', (event) => {
 });
 
 // ==========================================
-// RICEZIONE NOTIFICHE PUSH (CENTRO NOTIFICHE SISTEMA)
+// RICEZIONE NOTIFICHE PUSH A APP CHIUSA
 // ==========================================
 self.addEventListener('push', (event) => {
-  let data = {};
+  let data = { title: 'MeowGo 🐾', body: 'Hai una nuova notifica dallo staff!', url: './feed.html' };
 
   if (event.data) {
     try {
       data = event.data.json();
     } catch (e) {
-      data = { title: "MeowGo", body: event.data.text() };
+      data.body = event.data.text();
     }
   }
 
-  // Estrazione dati dal payload FCM o personalizzato
-  const title = data.title || data.notification?.title || 'Nuova Notifica MeowGo';
+  const title = data.title || data.notification?.title || 'MeowGo 🐾';
   const options = {
     body: data.body || data.message || data.notification?.body || 'Hai una nuova notifica!',
     icon: './icons/icon-192.png',
     badge: './icons/icon-192.png',
-    vibrate: [100, 50, 100],
+    vibrate: [200, 100, 200],
     data: {
       url: data.url || data.data?.url || './feed.html'
     }
