@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="it" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aggiornamenti Importanti - MeowGo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta+Sans', sans-serif;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+        .animate-float {
+            animation: float 4s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="h-full bg-[#f4efe6] text-[#5c4a3d] flex flex-col justify-between antialiased selection:bg-[#d35400] selection:text-white">
+
+    <header class="w-full py-6 px-6 flex justify-center items-center">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-2xl bg-[#d35400] flex items-center justify-center text-white font-black text-xl shadow-md shadow-[#d35400]/20 animate-float">
+                🐱
+            </div>
+            <span class="text-2xl font-black tracking-wider text-[#d35400]">MEOWGO</span>
+        </div>
+    </header>
+
+    <main class="flex-grow flex items-center justify-center px-4 sm:px-6 py-4">
+        <div class="w-full max-w-xl bg-white rounded-3xl shadow-xl shadow-stone-900/5 border border-[#eae3d2] overflow-hidden transition-all duration-300">
+            
+            <!-- Top Banner Visual -->
+            <div class="bg-gradient-to-br from-[#fcfaf7] to-[#f7f0e8] px-6 sm:px-10 pt-10 pb-6 text-center border-b border-[#f0e6d8]">
+                <div class="inline-flex items-center space-x-2 bg-[#d35400]/10 text-[#d35400] px-4 py-1.5 rounded-full text-xs font-bold tracking-wide uppercase mb-4">
+                    <span class="w-2 h-2 rounded-full bg-[#d35400] animate-pulse"></span>
+                    Comunicazione Ufficiale
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-[#4a2c11] tracking-tight">
+                    Aggiornamento Importante
+                </h1>
+                <p class="mt-3 text-sm sm:text-base text-[#5c4a3d] leading-relaxed max-w-md mx-auto">
+                    Ciao a tutti gli utenti di <strong class="text-[#4a2c11]">MeowGo</strong>! Vogliamo informarvi che stiamo facendo un grande passo avanti per migliorare la vostra esperienza.
+                </p>
+            </div>
+
+            <!-- Content Cards Section -->
+            <div class="p-6 sm:p-10 space-y-4">
+                
+                <!-- Server Migration Card -->
+                <div class="bg-[#fcfaf7] rounded-2xl p-5 border border-[#f0e6d8] flex items-start space-x-4 transition hover:border-[#d35400]/30">
+                    <div class="flex-shrink-0 w-12 h-12 rounded-xl bg-[#d35400]/10 flex items-center justify-center text-[#d35400]">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <rect x="2" y="3" width="20" height="6" rx="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <rect x="2" y="15" width="20" height="6" rx="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <line x1="6" y1="6" x2="6.01" y2="6" stroke-linecap="round" stroke-linejoin="round"/>
+                            <line x1="10" y1="6" x2="10.01" y2="6" stroke-linecap="round" stroke-linejoin="round"/>
+                            <line x1="6" y1="18" x2="6.01" y2="18" stroke-linecap="round" stroke-linejoin="round"/>
+                            <line x1="10" y1="18" x2="10.01" y2="18" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-[#4a2c11]">Migrazione dei Server</h3>
+                        <p class="text-sm text-[#6b584b] mt-1 leading-relaxed">
+                            Stiamo passando a server di nostra proprietà esclusiva per offrirvi un servizio molto più stabile, veloce e sicuro.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Domain & App Card -->
+                <div class="bg-[#fcfaf7] rounded-2xl p-5 border border-[#f0e6d8] flex items-start space-x-4 transition hover:border-[#d35400]/30">
+                    <div class="flex-shrink-0 w-12 h-12 rounded-xl bg-[#d35400]/10 flex items-center justify-center text-[#d35400]">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <rect x="5" y="2" width="14" height="20" rx="3" stroke-linecap="round" stroke-linejoin="round"/>
+                            <line x1="12" y1="18" x2="12.01" y2="18" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-[#4a2c11]">Nuovo Dominio e App</h3>
+                        <p class="text-sm text-[#6b584b] mt-1 leading-relaxed">
+                            Dal 26/09/2026 è disponibile il download dell'app e il nuovo sito ufficiale: <strong class="text-[#d35400]">meowgo.it</strong> (in fase di attivazione).
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Terms & Privacy info -->
+                <div class="pt-2 text-center">
+                    <p class="text-xs text-[#6b584b] leading-relaxed">
+                        Con questa migrazione abbiamo aggiornato le nostre infrastrutture nel rispetto dei 
+                        <a href="https://meowgo.it/termini" class="text-[#d35400] font-semibold underline hover:text-[#b54600]">Termini di Servizio</a> 
+                        e della nostra politica di 
+                        <a href="https://meowgo.it/privacy" class="text-[#d35400] font-semibold underline hover:text-[#b54600]">Privacy</a>.
+                    </p>
+                </div>
+
+                <div class="pt-6 border-t border-[#f0e6d8] mt-6">
+                    <h4 class="text-center text-xs font-bold uppercase tracking-wider text-[#8c7b6e] mb-4">
+                        Dove desideri procedere?
+                    </h4>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <!-- Vecchio Sito -->
+                        <a href="login.html" class="w-full flex items-center justify-center px-5 py-3.5 rounded-2xl bg-[#f4efe6] hover:bg-[#eae3d2] text-[#5c4a3d] font-bold text-sm transition-all shadow-sm active:scale-[0.98] border border-[#e6dbc7]">
+                            <svg class="w-4 h-4 mr-2 opacity-70" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z" />
+                            </svg>
+                            Procedi sul vecchio sito
+                        </a>
+                        
+                        <!-- Nuovo Sito -->
+                        <a href="https://meowgo.it" class="w-full flex items-center justify-center px-5 py-3.5 rounded-2xl bg-[#d35400] hover:bg-[#b54600] text-white font-bold text-sm transition-all shadow-md shadow-[#d35400]/25 active:scale-[0.98]">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13 9l3 3m0 0l-3 3m3-3H8m13 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Mandami sul sito nuovo
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <footer class="w-full py-6 px-6 text-center text-xs text-[#8c7b6e] space-y-2">
+        <p>Il presente messaggio è inviato in conformità al regolamento della piattaforma MeowGo.</p>
+        <div class="space-x-3">
+            <a href="https://meowgo.it/termini" class="underline hover:text-[#5c4a3d]">Termini di Servizio</a>
+            <span>|</span>
+            <a href="https://meowgo.it/privacy" class="underline hover:text-[#5c4a3d]">Politica di Privacy</a>
+        </div>
+        <p class="pt-1 text-[#a39386]">Contatto: <a href="mailto:team@meowgo.it" class="underline">team@meowgo.it</a></p>
+    </footer>
+
+</body>
+</html>
